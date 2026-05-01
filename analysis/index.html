@@ -730,7 +730,7 @@ async function load() {
       document.getElementById('ihsg-val').textContent = Number(ihsg.value).toLocaleString('id-ID', {minimumFractionDigits:2, maximumFractionDigits:2});
       const chgEl = document.getElementById('ihsg-chg');
       chgEl.textContent = (pos?'+':'') + ihsg.change_pct.toFixed(2) + '%';
-      chgEl.style.color = pos ? 'var(--green)' : 'var(--red)';
+      chgEl.style.color = ihsg.change_pct > 0 ? 'var(--green)' : ihsg.change_pct < 0 ? 'var(--red)' : 'var(--muted)';
       document.getElementById('ihsg-block').style.display = 'block';
     }
     document.getElementById('cnt-ex').textContent    = d.execute_count||0;
