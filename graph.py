@@ -56,7 +56,12 @@ def node_run_analysts(state: HedgeFundState) -> HedgeFundState:
         analysts = [fundamental.analyze, technical.analyze, sentiment.analyze, macro.analyze]
         with ThreadPoolExecutor(max_workers=4) as ex:
             futures = [ex.submit(fn, data) for fn in analysts]
-            reports = [f.result() for f in futures]
+            reports = []
+            for f in futures:
+                try:
+                    reports.append(f.result())
+                except Exception as e:
+                    print(f"  ⚠️ Analyst error (skipped): {e}")
         return {**state, "analyst_reports": [r.model_dump() for r in reports]}
     except Exception as e:
         return {**state, "error": f"Analysts failed: {e}"}
