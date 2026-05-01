@@ -22,7 +22,10 @@
   header h1{font-size:20px;font-weight:700;color:var(--text)}
   .pill{font-size:11px;background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border);padding:2px 10px;border-radius:20px;font-weight:600}
   .pill-g{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
-  .nav-link{font-size:12px;color:var(--blue);text-decoration:none;margin-left:auto}
+  .nav-link{font-size:12px;color:var(--blue);text-decoration:none}
+  .lang-toggle{display:flex;gap:2px;margin-left:auto;background:var(--border);border-radius:20px;padding:2px}
+  .lang-btn{padding:3px 10px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .15s}
+  .lang-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.3)}
   .meta{font-size:11px;color:var(--muted);text-align:right}
   .meta span{display:block}
 
@@ -203,9 +206,13 @@
   <span class="pill">LangGraph</span>
   <span class="pill">Claude Haiku</span>
   <span class="pill pill-g">IDX Stocks</span>
-  <div style="margin-left:auto;display:flex;gap:16px;align-items:center">
+  <div style="display:flex;gap:16px;align-items:center;margin-left:auto">
     <a href="https://yazqe.github.io/idx-dashboard/" target="_blank" class="nav-link">📊 Scalping</a>
     <a href="https://yazqe.github.io/idx-dashboard/swing/" target="_blank" class="nav-link" style="color:#3fb950">📈 Swing</a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-id" onclick="switchLang('id')">ID</button>
+      <button class="lang-btn" id="btn-en" onclick="switchLang('en')">EN</button>
+    </div>
   </div>
   <div class="meta">
     <span id="gen-date">–</span>
@@ -301,41 +308,41 @@
 <div class="stats-bar" id="stats-bar">
   <div class="stat-item">
     <div class="stat-num" style="color:var(--green)" id="cnt-ex">–</div>
-    <div class="stat-label">✅ Execute</div>
+    <div class="stat-label" data-i18n="stat_execute">✅ Eksekusi</div>
   </div>
   <div class="stat-item">
     <div class="stat-num" style="color:var(--gold)" id="cnt-mo">–</div>
-    <div class="stat-label">👀 Monitor</div>
+    <div class="stat-label" data-i18n="stat_monitor">👀 Monitor</div>
   </div>
   <div class="stat-item">
     <div class="stat-num" style="color:var(--muted)" id="cnt-pa">–</div>
-    <div class="stat-label">⛔ Pass</div>
+    <div class="stat-label" data-i18n="stat_pass">⛔ Lewati</div>
   </div>
   <div class="stat-item" style="border-left:2px solid var(--border)">
     <div class="stat-num" style="color:var(--blue)" id="cnt-val">–</div>
-    <div class="stat-label">💰 Top Value</div>
+    <div class="stat-label" data-i18n="stat_value">💰 Nilai Teratas</div>
   </div>
   <div class="stat-item">
     <div class="stat-num" style="color:var(--green)" id="cnt-gain">–</div>
-    <div class="stat-label">📈 Top Gainers</div>
+    <div class="stat-label" data-i18n="stat_gainers">📈 Penguatan</div>
   </div>
   <div class="stat-item">
     <div class="stat-num" style="color:var(--purple)" id="cnt-freq">–</div>
-    <div class="stat-label">🔄 Frequency</div>
+    <div class="stat-label" data-i18n="stat_frequency">🔄 Frekuensi</div>
   </div>
   <div class="stat-item">
     <div class="stat-num" style="color:var(--muted)" id="cnt-tot">–</div>
-    <div class="stat-label">📊 Total</div>
+    <div class="stat-label" data-i18n="stat_total">📊 Total</div>
   </div>
 </div>
 
 <!-- Filter bar -->
 <div class="filter-bar" id="filter-bar">
-  <span class="filter-label">Filter by source:</span>
-  <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
-  <button class="filter-btn" onclick="setFilter('VALUE',this)">💰 Top Value</button>
-  <button class="filter-btn" onclick="setFilter('GAINER',this)">📈 Top Gainers</button>
-  <button class="filter-btn" onclick="setFilter('FREQUENCY',this)">🔄 Frequency</button>
+  <span class="filter-label" data-i18n="filter_label">Filter berdasarkan:</span>
+  <button class="filter-btn active" onclick="setFilter('all',this)" data-i18n="filter_all">Semua</button>
+  <button class="filter-btn" onclick="setFilter('VALUE',this)" data-i18n="filter_value">💰 Nilai Teratas</button>
+  <button class="filter-btn" onclick="setFilter('GAINER',this)" data-i18n="filter_gainers">📈 Penguatan</button>
+  <button class="filter-btn" onclick="setFilter('FREQUENCY',this)" data-i18n="filter_frequency">🔄 Frekuensi</button>
   <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="filter-count"></span>
 </div>
 
@@ -352,13 +359,108 @@ const sign = p => p>0?'+':'';
 const DATA_URL = './data/latest.json';
 var _allResults = [];
 var _activeFilter = 'all';
+var LANG = localStorage.getItem('idx_lang') || 'id';
 
-const SRC_META = {
-  VALUE:     {cls:'src-value',     label:'💰 Value'},
-  GAINER:    {cls:'src-gainer',    label:'📈 Gainer'},
-  FREQUENCY: {cls:'src-frequency', label:'🔄 Freq'},
-  CUSTOM:    {cls:'src-custom',    label:'Custom'},
+// ── Translation dictionary ─────────────────────────────────────
+const TR = {
+  id: {
+    signal_STRONG_BUY:'Beli Kuat', signal_BUY:'Beli', signal_HOLD:'Tahan',
+    signal_SELL:'Jual', signal_STRONG_SELL:'Jual Kuat',
+    analyst_fundamental:'📊 Fundamental', analyst_technical:'📉 Teknikal',
+    analyst_sentiment:'💬 Sentimen', analyst_macro:'📰 Makro',
+    rsi_overbought:'Jenuh Beli', rsi_oversold:'Jenuh Jual', rsi_neutral:'Netral',
+    rsi_tip_hot:'RSI ≥70 = jenuh beli, potensi berbalik turun',
+    rsi_tip_cold:'RSI ≤30 = jenuh jual, potensi berbalik naik',
+    rsi_tip_mid:'RSI 30–70 = momentum netral',
+    debate_won:'menang', debate_tip:'Pemenang debat',
+    risk_LOW:'Risiko Rendah — aman untuk posisi',
+    risk_MEDIUM:'Risiko Sedang — posisi kecil',
+    risk_HIGH:'Risiko Tinggi — hindari',
+    risk_REJECT:'Risiko Ditolak — jangan masuk',
+    lbl_action:'AKSI', lbl_entry:'HARGA MASUK', lbl_target:'HARGA TARGET',
+    lbl_stoploss:'STOP LOSS', lbl_possize:'UKURAN POSISI', lbl_risklvl:'LEVEL RISIKO',
+    sub_direction:'Arah transaksi', sub_entry:'Harga masuk disarankan',
+    sub_upside:'potensi naik', sub_maxloss:'maks. rugi', sub_portfolio:'% dari portofolio',
+    lbl_riskapproved:'DISETUJUI', lbl_consensus:'KONSENSUS',
+    sub_byrisk:'Oleh manajer risiko', sub_afterdebate:'Setelah debat',
+    yes:'Ya', no:'Tidak',
+    analyst_signals:'Sinyal Analis',
+    click_expand:'klik untuk detail ▾',
+    debate_title:'⚔️ Debat Bull vs Bear:',
+    pm_title:'📋 Keputusan Portfolio Manager:',
+    analyzed:'Dianalisis',
+    today:'hari ini',
+    src_VALUE:'💰 Nilai', src_GAINER:'📈 Naik', src_FREQUENCY:'🔄 Frekuensi', src_CUSTOM:'Khusus',
+    stat_execute:'✅ Eksekusi', stat_monitor:'👀 Monitor', stat_pass:'⛔ Lewati',
+    stat_value:'💰 Nilai Teratas', stat_gainers:'📈 Penguatan',
+    stat_frequency:'🔄 Frekuensi', stat_total:'📊 Total',
+    filter_label:'Filter berdasarkan:', filter_all:'Semua',
+    filter_value:'💰 Nilai Teratas', filter_gainers:'📈 Penguatan', filter_frequency:'🔄 Frekuensi',
+    n_stocks:'saham', detail_hint:'klik kartu untuk detail',
+    no_data:'⚠️ Tidak ada data untuk filter ini.',
+    no_source:'⚠️ Data belum memiliki tag sumber. Menampilkan semua hasil.',
+    loading:'Memuat analisis AI…',
+  },
+  en: {
+    signal_STRONG_BUY:'Strong Buy', signal_BUY:'Buy', signal_HOLD:'Hold',
+    signal_SELL:'Sell', signal_STRONG_SELL:'Strong Sell',
+    analyst_fundamental:'📊 Fundamental', analyst_technical:'📉 Technical',
+    analyst_sentiment:'💬 Sentiment', analyst_macro:'📰 Macro',
+    rsi_overbought:'Overbought', rsi_oversold:'Oversold', rsi_neutral:'Neutral',
+    rsi_tip_hot:'RSI ≥70 = overbought, potential reversal down',
+    rsi_tip_cold:'RSI ≤30 = oversold, potential reversal up',
+    rsi_tip_mid:'RSI 30–70 = neutral momentum',
+    debate_won:'won', debate_tip:'Debate winner',
+    risk_LOW:'Low Risk — safe to size up',
+    risk_MEDIUM:'Medium Risk — size cautiously',
+    risk_HIGH:'High Risk — small size only',
+    risk_REJECT:'Risk Rejected — do not enter',
+    lbl_action:'ACTION', lbl_entry:'ENTRY PRICE', lbl_target:'TARGET PRICE',
+    lbl_stoploss:'STOP LOSS', lbl_possize:'POSITION SIZE', lbl_risklvl:'RISK LEVEL',
+    sub_direction:'Trade direction', sub_entry:'Suggested entry',
+    sub_upside:'upside', sub_maxloss:'max loss', sub_portfolio:'% of portfolio',
+    lbl_riskapproved:'APPROVED', lbl_consensus:'CONSENSUS',
+    sub_byrisk:'By risk manager', sub_afterdebate:'After bull vs bear debate',
+    yes:'Yes', no:'No',
+    analyst_signals:'Analyst Signals',
+    click_expand:'click to expand ▾',
+    debate_title:'⚔️ Bull vs Bear Debate:',
+    pm_title:'📋 Portfolio Manager Decision:',
+    analyzed:'Analyzed',
+    today:'today',
+    src_VALUE:'💰 Value', src_GAINER:'📈 Gainer', src_FREQUENCY:'🔄 Freq', src_CUSTOM:'Custom',
+    stat_execute:'✅ Execute', stat_monitor:'👀 Monitor', stat_pass:'⛔ Pass',
+    stat_value:'💰 Top Value', stat_gainers:'📈 Top Gainers',
+    stat_frequency:'🔄 Frequency', stat_total:'📊 Total',
+    filter_label:'Filter by source:', filter_all:'All',
+    filter_value:'💰 Top Value', filter_gainers:'📈 Top Gainers', filter_frequency:'🔄 Frequency',
+    n_stocks:'stocks', detail_hint:'click card for details',
+    no_data:'⚠️ No data for this filter.',
+    no_source:'⚠️ Data has no source tags. Showing all results.',
+    loading:'Loading AI analysis…',
+  }
 };
+function t(key){ return (TR[LANG]||TR.id)[key] || key; }
+
+function switchLang(lang) {
+  LANG = lang;
+  localStorage.setItem('idx_lang', lang);
+  document.getElementById('btn-id').classList.toggle('active', lang==='id');
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  // Update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  // Re-render cards with new language
+  renderCards(_allResults);
+}
+
+const SRC_META_fn = () => ({
+  VALUE:     {cls:'src-value',     label: t('src_VALUE')},
+  GAINER:    {cls:'src-gainer',    label: t('src_GAINER')},
+  FREQUENCY: {cls:'src-frequency', label: t('src_FREQUENCY')},
+  CUSTOM:    {cls:'src-custom',    label: t('src_CUSTOM')},
+});
 
 function chipClass(s) {
   return {STRONG_BUY:'chip-sbuy',BUY:'chip-buy',HOLD:'chip-hold',
@@ -375,7 +477,7 @@ function renderSummarySection(results) {
         <span class="sr-ticker">${r.ticker}</span>
         <span class="sr-sector">${(r.sector||'–').split(' ').slice(0,2).join(' ')}</span>
         <span class="sr-chg ${clr(r.market_change)}">${sign(r.market_change)}${(r.market_change||0).toFixed(1)}%</span>
-        <span class="sr-chip"><span class="chip ${chipClass(r.debate_consensus)}">${SIGNAL_LABELS[r.debate_consensus]||r.debate_consensus||'–'}</span></span>
+        <span class="sr-chip"><span class="chip ${chipClass(r.debate_consensus)}">${SIGNAL_LABELS_fn()[r.debate_consensus]||r.debate_consensus||'–'}</span></span>
       </div>`).join('')
     : '<div style="color:var(--muted);font-size:12px;padding:6px 0">—</div>';
 
@@ -392,27 +494,27 @@ function renderSummarySection(results) {
   </div>`;
 }
 
-const ANALYST_LABELS = {
-  fundamental:'📊 Fundamental', technical:'📉 Technical',
-  sentiment:'💬 Sentiment',     macro:'📰 Macro'
-};
-const SIGNAL_LABELS = {
-  STRONG_BUY:'Strong Buy', BUY:'Buy', HOLD:'Hold',
-  SELL:'Sell', STRONG_SELL:'Strong Sell'
-};
-const RISK_META = {
-  LOW:    {cls:'var(--green)', label:'Low Risk — safe to size up'},
-  MEDIUM: {cls:'var(--gold)',  label:'Medium Risk — size cautiously'},
-  HIGH:   {cls:'var(--red)',   label:'High Risk — small size only'},
-  REJECT: {cls:'var(--red)',   label:'Risk Rejected — do not enter'},
-};
+const ANALYST_LABELS_fn = () => ({
+  fundamental: t('analyst_fundamental'), technical: t('analyst_technical'),
+  sentiment:   t('analyst_sentiment'),   macro:     t('analyst_macro'),
+});
+const SIGNAL_LABELS_fn = () => ({
+  STRONG_BUY: t('signal_STRONG_BUY'), BUY: t('signal_BUY'), HOLD: t('signal_HOLD'),
+  SELL: t('signal_SELL'), STRONG_SELL: t('signal_STRONG_SELL'),
+});
+const RISK_META_fn = () => ({
+  LOW:    {cls:'var(--green)', label: t('risk_LOW')},
+  MEDIUM: {cls:'var(--gold)',  label: t('risk_MEDIUM')},
+  HIGH:   {cls:'var(--red)',   label: t('risk_HIGH')},
+  REJECT: {cls:'var(--red)',   label: t('risk_REJECT')},
+});
 
 function rsiPill(rsi) {
   if (!rsi) return '';
   const v = Number(rsi).toFixed(0);
-  if (rsi >= 70) return `<span class="rsi-pill rsi-hot" title="RSI ≥70 = overbought, potential reversal down">RSI ${v} Overbought</span>`;
-  if (rsi <= 30) return `<span class="rsi-pill rsi-cold" title="RSI ≤30 = oversold, potential reversal up">RSI ${v} Oversold</span>`;
-  return `<span class="rsi-pill rsi-mid" title="RSI 30–70 = neutral momentum">RSI ${v} Neutral</span>`;
+  if (rsi >= 70) return `<span class="rsi-pill rsi-hot" title="${t('rsi_tip_hot')}">RSI ${v} ${t('rsi_overbought')}</span>`;
+  if (rsi <= 30) return `<span class="rsi-pill rsi-cold" title="${t('rsi_tip_cold')}">RSI ${v} ${t('rsi_oversold')}</span>`;
+  return `<span class="rsi-pill rsi-mid" title="${t('rsi_tip_mid')}">RSI ${v} ${t('rsi_neutral')}</span>`;
 }
 
 function debatePill(winner, consensus) {
@@ -420,8 +522,9 @@ function debatePill(winner, consensus) {
   const isBull = winner === 'BULL';
   const icon   = isBull ? '🐂' : '🐻';
   const cls    = isBull ? 'debate-bull' : 'debate-bear';
-  const cLabel = SIGNAL_LABELS[consensus] || consensus || '–';
-  return `<span class="debate-pill ${cls}" title="Debate winner: ${winner}. Final consensus after bull/bear rounds.">${icon} ${winner} won · ${cLabel}</span>`;
+  const SL     = SIGNAL_LABELS_fn();
+  const cLabel = SL[consensus] || consensus || '–';
+  return `<span class="debate-pill ${cls}" title="${t('debate_tip')}: ${winner}">${icon} ${winner} ${t('debate_won')} · ${cLabel}</span>`;
 }
 
 function pct(a, b) {
@@ -434,15 +537,20 @@ function renderStock(r) {
   const icon = r.decision==='EXECUTE'?'✅':r.decision==='MONITOR'?'👀':'⛔';
   const bdg  = `badge-${r.decision==='EXECUTE'?'execute':r.decision==='MONITOR'?'monitor':'pass'}`;
 
+  const AL = ANALYST_LABELS_fn();
+  const SL = SIGNAL_LABELS_fn();
+  const RM = RISK_META_fn();
+  const SM = SRC_META_fn();
+
   // Analyst grid: 3 rows × 4 cols so each row aligns perfectly
   const ANALYST_ORDER = ['fundamental','technical','sentiment','macro'];
   const _adata = ANALYST_ORDER.map(key => {
     const s    = (r.analyst_signals||[]).find(x=>(x.type||'').toLowerCase()===key);
     const conf = s?.confidence != null ? (s.confidence*100).toFixed(0) : null;
     return {
-      label:    ANALYST_LABELS[key],
+      label:    AL[key],
       sigCls:   s ? chipClass(s.signal) : 'chip-hold',
-      sigLabel: s ? (SIGNAL_LABELS[s.signal]||s.signal) : '–',
+      sigLabel: s ? (SL[s.signal]||s.signal) : '–',
       conf,
     };
   });
@@ -460,56 +568,56 @@ function renderStock(r) {
   // Trade parameter section
   const upside   = pct(r.entry_price, r.target_price);
   const downside = pct(r.entry_price, r.stop_loss);
-  const riskMeta = RISK_META[r.risk_level] || {cls:'var(--muted)', label:r.risk_level||'–'};
+  const riskMeta = RM[r.risk_level] || {cls:'var(--muted)', label:r.risk_level||'–'};
 
   const tradeGrid = r.entry_price ? `
   <div class="metric-row">
     <div class="metric-box">
-      <div class="metric-label">Action</div>
-      <div class="metric-value" style="color:${(r.action||'').includes('BUY')?'var(--green)':'var(--red)'}">${r.action||'–'}</div>
-      <div class="metric-sub">Trade direction</div>
+      <div class="metric-label">${t('lbl_action')}</div>
+      <div class="metric-value" style="color:${(r.action||'').includes('BUY')?'var(--green)':'var(--red)'}">${SL[r.action]||r.action||'–'}</div>
+      <div class="metric-sub">${t('sub_direction')}</div>
     </div>
     <div class="metric-box">
-      <div class="metric-label">Entry Price</div>
+      <div class="metric-label">${t('lbl_entry')}</div>
       <div class="metric-value">Rp${fmt(r.entry_price)}</div>
-      <div class="metric-sub">Suggested entry</div>
+      <div class="metric-sub">${t('sub_entry')}</div>
     </div>
     <div class="metric-box">
-      <div class="metric-label">Target Price</div>
+      <div class="metric-label">${t('lbl_target')}</div>
       <div class="metric-value" style="color:var(--green)">Rp${fmt(r.target_price)}</div>
-      <div class="metric-sub" style="color:var(--green)">+${upside}% upside</div>
+      <div class="metric-sub" style="color:var(--green)">+${upside}% ${t('sub_upside')}</div>
     </div>
     <div class="metric-box">
-      <div class="metric-label">Stop Loss</div>
+      <div class="metric-label">${t('lbl_stoploss')}</div>
       <div class="metric-value" style="color:var(--red)">Rp${fmt(r.stop_loss)}</div>
-      <div class="metric-sub" style="color:var(--red)">${downside}% max loss</div>
+      <div class="metric-sub" style="color:var(--red)">${downside}% ${t('sub_maxloss')}</div>
     </div>
     <div class="metric-box">
-      <div class="metric-label">Position Size</div>
+      <div class="metric-label">${t('lbl_possize')}</div>
       <div class="metric-value" style="color:var(--gold)">${(r.position_size||0).toFixed(1)}%</div>
-      <div class="metric-sub">% of portfolio</div>
+      <div class="metric-sub">${t('sub_portfolio')}</div>
     </div>
     <div class="metric-box">
-      <div class="metric-label">Risk Level</div>
+      <div class="metric-label">${t('lbl_risklvl')}</div>
       <div class="metric-value" style="color:${riskMeta.cls}">${r.risk_level||'–'}</div>
       <div class="metric-sub">${riskMeta.label}</div>
     </div>
   </div>` : `
   <div class="metric-row">
     <div class="metric-box" style="flex:1">
-      <div class="metric-label">Risk Level</div>
+      <div class="metric-label">${t('lbl_risklvl')}</div>
       <div class="metric-value" style="color:${riskMeta.cls}">${r.risk_level||'–'}</div>
       <div class="metric-sub">${riskMeta.label}</div>
     </div>
     <div class="metric-box" style="flex:1">
-      <div class="metric-label">Risk Approved</div>
-      <div class="metric-value" style="color:${r.risk_approved?'var(--green)':'var(--red)'}">${r.risk_approved?'Yes':'No'}</div>
-      <div class="metric-sub">By risk manager</div>
+      <div class="metric-label">${t('lbl_riskapproved')}</div>
+      <div class="metric-value" style="color:${r.risk_approved?'var(--green)':'var(--red)'}">${r.risk_approved?t('yes'):t('no')}</div>
+      <div class="metric-sub">${t('sub_byrisk')}</div>
     </div>
     <div class="metric-box" style="flex:2">
-      <div class="metric-label">Consensus</div>
-      <div class="metric-value">${SIGNAL_LABELS[r.debate_consensus]||r.debate_consensus||'–'}</div>
-      <div class="metric-sub">After bull vs bear debate</div>
+      <div class="metric-label">${t('lbl_consensus')}</div>
+      <div class="metric-value">${SL[r.debate_consensus]||r.debate_consensus||'–'}</div>
+      <div class="metric-sub">${t('sub_afterdebate')}</div>
     </div>
   </div>`;
 
@@ -522,29 +630,29 @@ function renderStock(r) {
         <span class="badge ${bdg}">${icon} ${r.decision}</span>
         <span style="font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 8px;color:var(--muted)">${r.sector||'–'}</span>
         <div style="display:flex;gap:4px;align-items:center">
-          ${(r.sources||[]).map(s=>`<span class="src-badge ${(SRC_META[s]||{cls:'src-custom'}).cls}">${(SRC_META[s]||{label:s}).label}</span>`).join('')}
+          ${(r.sources||[]).map(s=>`<span class="src-badge ${(SM[s]||{cls:'src-custom'}).cls}">${(SM[s]||{label:s}).label}</span>`).join('')}
         </div>
         <div class="price-block">
           <span class="price-main">Rp${fmt(r.market_price)}</span>
-          <span class="price-chg ${clr(r.market_change)}">${sign(r.market_change)}${(r.market_change||0).toFixed(2)}% today</span>
+          <span class="price-chg ${clr(r.market_change)}">${sign(r.market_change)}${(r.market_change||0).toFixed(2)}% ${t('today')}</span>
         </div>
       </div>
       <div style="padding:8px 0 0;border-top:1px solid var(--border);margin-top:8px">
-        <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Analyst Signals</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">${t('analyst_signals')}</div>
         <div class="analyst-grid">${analystGrid}</div>
       </div>
       <div class="sc-header-bot">
         ${debatePill(r.debate_winner, r.debate_consensus)}
         ${rsiPill(r.rsi)}
-        <span style="margin-left:auto;font-size:11px;color:var(--muted)">click to expand ▾</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--muted)">${t('click_expand')}</span>
       </div>
     </div>
     <div class="sc-body">
       ${tradeGrid}
-      <div class="debate-box"><strong>⚔️ Bull vs Bear Debate:</strong><br>${r.debate_summary||'–'}</div>
-      <div class="reasoning-box"><strong>📋 Portfolio Manager Decision:</strong><br>${r.reasoning||'–'}</div>
+      <div class="debate-box"><strong>${t('debate_title')}</strong><br>${r.debate_summary||'–'}</div>
+      <div class="reasoning-box"><strong>${t('pm_title')}</strong><br>${r.reasoning||'–'}</div>
       ${flags ? `<div class="flags-box" style="margin-top:8px">${flags}</div>` : ''}
-      <div style="margin-top:10px;font-size:11px;color:var(--muted)">🕐 Analyzed: ${r.analyzed_at}</div>
+      <div style="margin-top:10px;font-size:11px;color:var(--muted)">🕐 ${t('analyzed')}: ${r.analyzed_at}</div>
     </div>
   </div>`;
 }
@@ -574,7 +682,7 @@ function renderCards(results) {
 
   document.getElementById('main').innerHTML =
     (emptyMsg || '') +
-    '<div style="font-size:12px;color:var(--muted)">' + filtered.length + ' saham · klik kartu untuk detail lengkap</div>' +
+    '<div style="font-size:12px;color:var(--muted)">' + filtered.length + ' ' + t('n_stocks') + ' · ' + t('detail_hint') + '</div>' +
     filtered.map(renderStock).join('');
 }
 
@@ -614,6 +722,8 @@ async function load() {
 }
 load();
 setInterval(load, 15*60*1000);
+// Apply saved language on load
+switchLang(LANG);
 
 // ── Tabs ──────────────────────────────────────────────────────
 function switchTab(name, el) {
