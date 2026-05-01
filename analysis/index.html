@@ -413,8 +413,8 @@ const fmt  = (n,d=0) => n==null?'–':Number(n).toLocaleString('id-ID',{minimumF
 const clr  = p => p>0?'pos':p<0?'neg':'neu';
 const sign = p => p>0?'+':'';
 const DATA_URL = './data/latest.json';
-let _allResults = [];
-let _activeFilter = 'all';
+var _allResults = [];
+var _activeFilter = 'all';
 
 const SRC_META = {
   VALUE:     {cls:'src-value',     label:'💰 Value'},
@@ -606,16 +606,32 @@ function renderStock(r) {
 }
 
 function renderCards(results) {
-  const filtered = _activeFilter === 'all'
+  var noSourceData = results.length > 0 && results.every(r => !(r.sources||[]).length);
+  var filtered = (_activeFilter === 'all' || noSourceData)
     ? results
-    : results.filter(r => (r.sources||[]).includes(_activeFilter));
-  const fc = document.getElementById('filter-count');
-  if (fc) fc.textContent = _activeFilter === 'all' ? '' : `${filtered.length} saham`;
+    : results.filter(function(r){ return (r.sources||[]).includes(_activeFilter); });
+
+  var fc = document.getElementById('filter-count');
+  if (fc) fc.textContent = (_activeFilter === 'all' || noSourceData) ? '' : filtered.length + ' saham';
+
+  var emptyMsg = '';
+  if (filtered.length === 0 && _activeFilter !== 'all') {
+    emptyMsg = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">'
+      + '⚠️ Tidak ada data untuk filter ini.<br>'
+      + '<span style="font-size:11px">Jalankan ulang batch_analysis.py untuk data terbaru.</span>'
+      + '</div>';
+  }
+  if (noSourceData && _activeFilter !== 'all') {
+    emptyMsg = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">'
+      + '⚠️ Data belum memiliki tag sumber.<br>'
+      + '<span style="font-size:11px">Jalankan ulang batch_analysis.py untuk mengaktifkan filter ini. Menampilkan semua hasil.</span>'
+      + '</div>';
+  }
+
   document.getElementById('main').innerHTML =
     renderSummarySection(filtered) +
-    `<div style="font-size:12px;color:var(--muted)">
-      ${filtered.length} saham · klik kartu untuk detail lengkap
-    </div>` +
+    (emptyMsg || '') +
+    '<div style="font-size:12px;color:var(--muted)">' + filtered.length + ' saham · klik kartu untuk detail lengkap</div>' +
     filtered.map(renderStock).join('');
 }
 
