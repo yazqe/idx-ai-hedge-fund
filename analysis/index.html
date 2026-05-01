@@ -132,6 +132,34 @@
   .loading{text-align:center;padding:60px;color:var(--muted)}
   .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
   @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ── Tabs ── */
+  .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--card);padding:0 32px}
+  .tab{padding:12px 20px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s}
+  .tab:hover{color:var(--text)}
+  .tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+  .tab-content{display:none}.tab-content.active{display:block}
+
+  /* ── Analyze form ── */
+  .analyze-section{max-width:700px;margin:32px auto;padding:0 32px}
+  .form-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px 32px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .form-title{font-size:16px;font-weight:700;margin-bottom:6px}
+  .form-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+  .input-row{display:flex;gap:10px}
+  .ticker-input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;text-transform:uppercase;outline:none;transition:border-color .15s}
+  .ticker-input:focus{border-color:var(--blue)}
+  .btn-analyze{padding:10px 24px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .15s}
+  .btn-analyze:hover{opacity:.85}
+  .btn-analyze:disabled{opacity:.5;cursor:not-allowed}
+  .status-box{margin-top:16px;padding:12px 16px;border-radius:8px;font-size:12px;display:none}
+  .status-box.running{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue);display:block}
+  .status-box.error{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);display:block}
+  .status-box.done{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);display:block}
+  .result-area{margin-top:16px}
+  .local-only{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--gold);margin-top:12px}
+  .quick-tickers{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .quick-btn{padding:5px 12px;background:var(--bg);border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text);transition:background .15s}
+  .quick-btn:hover{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue)}
 </style>
 </head>
 <body>
@@ -246,8 +274,49 @@
   </div>
 </div>
 
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('batch',this)">📊 Batch Results</div>
+  <div class="tab" onclick="switchTab('analyze',this)">🔍 Analyze Ticker</div>
+</div>
+
+<!-- Analyze Tab -->
+<div id="tab-analyze" class="tab-content">
+  <div class="analyze-section">
+    <div class="form-card">
+      <div class="form-title">🔍 Analyze IDX Stock</div>
+      <div class="form-sub">Masukkan kode saham IDX untuk analisis AI lengkap (Fundamental · Technical · Sentiment · Macro · Debate · Risk)</div>
+      <div class="input-row">
+        <input class="ticker-input" id="ticker-input" type="text" placeholder="contoh: BBCA" maxlength="6"
+               oninput="this.value=this.value.toUpperCase()"
+               onkeydown="if(event.key==='Enter')runAnalysis()">
+        <button class="btn-analyze" id="btn-run" onclick="runAnalysis()">▶ Analyze</button>
+      </div>
+      <div class="quick-tickers">
+        <span style="font-size:11px;color:var(--muted);align-self:center">Quick pick:</span>
+        <button class="quick-btn" onclick="setTicker('BBCA')">BBCA</button>
+        <button class="quick-btn" onclick="setTicker('BUMI')">BUMI</button>
+        <button class="quick-btn" onclick="setTicker('GOTO')">GOTO</button>
+        <button class="quick-btn" onclick="setTicker('TLKM')">TLKM</button>
+        <button class="quick-btn" onclick="setTicker('ANTM')">ANTM</button>
+        <button class="quick-btn" onclick="setTicker('BBRI')">BBRI</button>
+        <button class="quick-btn" onclick="setTicker('BMRI')">BMRI</button>
+        <button class="quick-btn" onclick="setTicker('MDKA')">MDKA</button>
+      </div>
+      <div class="local-only">
+        ⚡ <strong>Requires local API server.</strong> Jalankan di terminal:
+        <code style="display:block;margin-top:6px;background:rgba(0,0,0,.05);padding:6px 10px;border-radius:6px;font-family:monospace">
+          cd ~/idx-ai-hedge-fund && source .venv/bin/activate && python api_server.py
+        </code>
+      </div>
+      <div class="status-box" id="status-box"></div>
+      <div class="result-area" id="result-area"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Stats -->
-<div class="stats-bar">
+<div class="stats-bar" id="stats-bar">
   <div class="stat-item">
     <div class="stat-num" style="color:var(--green)" id="cnt-ex">–</div>
     <div class="stat-label">✅ Execute</div>
@@ -266,7 +335,8 @@
   </div>
 </div>
 
-<!-- Main content -->
+<!-- Batch tab wrapper -->
+<div id="tab-batch" class="tab-content active">
 <main id="main">
   <div class="loading"><div class="spinner"></div>Memuat analisis AI…</div>
 </main>
@@ -387,6 +457,81 @@ async function load() {
 }
 load();
 setInterval(load, 15*60*1000);
+
+// ── Tabs ──────────────────────────────────────────────────────
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  // show/hide stats bar (only for batch)
+  const sb = document.getElementById('stats-bar');
+  if (sb) sb.style.display = name==='batch' ? 'flex' : 'none';
+}
+
+// ── Analyze Ticker ─────────────────────────────────────────────
+const LOCAL_API = 'http://localhost:8765';
+let _pollTimer = null;
+
+function setTicker(t) {
+  document.getElementById('ticker-input').value = t;
+}
+
+function setStatus(cls, msg) {
+  const el = document.getElementById('status-box');
+  el.className = 'status-box ' + cls;
+  el.innerHTML = msg;
+}
+
+function renderSingleResult(r) {
+  const cls  = r.decision==='EXECUTE'?'execute':r.decision==='MONITOR'?'monitor':'pass_';
+  const icon = r.decision==='EXECUTE'?'✅':r.decision==='MONITOR'?'👀':'⛔';
+  return `<div style="margin-top:16px">${renderStock(r)}</div>`;
+}
+
+async function pollResult(ticker) {
+  try {
+    const r = await fetch(`${LOCAL_API}/api/result/${ticker}`);
+    const d = await r.json();
+    if (d.status === 'done') {
+      clearInterval(_pollTimer);
+      setStatus('done', `✅ Analisis ${ticker} selesai!`);
+      document.getElementById('result-area').innerHTML = renderSingleResult(d.result);
+      document.getElementById('btn-run').disabled = false;
+    } else if (d.status === 'error') {
+      clearInterval(_pollTimer);
+      setStatus('error', `❌ Analisis ${ticker} gagal. Cek terminal untuk error.`);
+      document.getElementById('btn-run').disabled = false;
+    }
+  } catch(e) {}
+}
+
+async function runAnalysis() {
+  const ticker = (document.getElementById('ticker-input').value||'').trim().toUpperCase();
+  if (!ticker) { setStatus('error','Masukkan kode saham terlebih dahulu.'); return; }
+
+  document.getElementById('btn-run').disabled = true;
+  document.getElementById('result-area').innerHTML = '';
+  setStatus('running', `⏳ Menghubungi local API server...`);
+
+  try {
+    const r = await fetch(`${LOCAL_API}/api/health`, {signal: AbortSignal.timeout(3000)});
+    if (!r.ok) throw new Error();
+  } catch(e) {
+    setStatus('error', `❌ Local API server tidak berjalan.<br>
+      <code style="font-size:11px;display:block;margin-top:6px;background:rgba(0,0,0,.06);padding:6px;border-radius:4px">
+        cd ~/idx-ai-hedge-fund && source .venv/bin/activate && python api_server.py
+      </code>`);
+    document.getElementById('btn-run').disabled = false;
+    return;
+  }
+
+  setStatus('running', `🤖 Menganalisis <strong>${ticker}</strong>… (estimasi 2–4 menit)`);
+  await fetch(`${LOCAL_API}/api/analyze/${ticker}`, {method:'POST'});
+  clearInterval(_pollTimer);
+  _pollTimer = setInterval(()=>pollResult(ticker), 5000);
+}
 </script>
+</div><!-- end tab-batch -->
 </body>
 </html>
