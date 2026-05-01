@@ -99,9 +99,13 @@
   .execute .sc-title{color:var(--green)}
   .monitor .sc-title{color:var(--gold)}
 
-  .stock-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .stock-row{display:grid;grid-template-columns:44px 1fr 40px 62px;align-items:center;gap:4px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
   .stock-row:last-child{border-bottom:none}
   .sr-ticker{font-weight:700;color:var(--blue)}
+  .sr-sector{color:var(--muted);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sr-chg{text-align:right;font-size:11px;font-weight:600}
+  .sr-chip{display:flex;justify-content:flex-end}
+  .sr-chip .chip{font-size:9px;white-space:nowrap;text-align:center;width:100%}
 
   .stock-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
   .stock-card.execute{border-left:4px solid var(--green-border)}
@@ -437,9 +441,9 @@ function renderSummarySection(results) {
   const mkRows = items => items.length
     ? items.map(r=>`<div class="stock-row">
         <span class="sr-ticker">${r.ticker}</span>
-        <span style="color:var(--muted);font-size:10px">${(r.sector||'').split(' ').slice(0,2).join(' ')}</span>
-        <span class="${clr(r.market_change)}" style="font-size:11px" title="Today's price change">${sign(r.market_change)}${(r.market_change||0).toFixed(1)}%</span>
-        <span class="chip ${chipClass(r.debate_consensus)}" style="font-size:9px" title="Debate consensus">${SIGNAL_LABELS[r.debate_consensus]||r.debate_consensus||'–'}</span>
+        <span class="sr-sector">${(r.sector||'–').split(' ').slice(0,2).join(' ')}</span>
+        <span class="sr-chg ${clr(r.market_change)}">${sign(r.market_change)}${(r.market_change||0).toFixed(1)}%</span>
+        <span class="sr-chip"><span class="chip ${chipClass(r.debate_consensus)}">${SIGNAL_LABELS[r.debate_consensus]||r.debate_consensus||'–'}</span></span>
       </div>`).join('')
     : '<div style="color:var(--muted);font-size:12px;padding:6px 0">—</div>';
 
