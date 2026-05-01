@@ -18,6 +18,24 @@ HEADERS = {
 SUSPENDED = {"WBSA", "BAPA"}
 
 
+def get_ihsg():
+    """Fetch IHSG (Jakarta Composite Index) latest value."""
+    try:
+        r = requests.post(SCANNER_URL, headers=HEADERS, json={
+            "symbols": {"tickers": ["IDX:COMPOSITE"]},
+            "columns": ["close", "change", "change_abs"],
+        }, timeout=10)
+        if r.status_code != 200:
+            return None
+        data = r.json().get("data", [])
+        if not data:
+            return None
+        d = data[0]["d"]
+        return {"value": d[0], "change_pct": round(d[1], 2), "change_abs": round(d[2], 2)}
+    except Exception:
+        return None
+
+
 def get_top_value_stocks(n=12):
     """Get top IDX stocks by trading value (most liquid — institutional focus)."""
     r = requests.post(SCANNER_URL, headers=HEADERS, json={
@@ -194,9 +212,15 @@ def main(tickers=None):
     order = {"EXECUTE": 0, "MONITOR": 1, "PASS": 2, "ERROR": 3}
     results.sort(key=lambda x: (order.get(x["decision"], 3), x.get("position_size", 0) * -1))
 
+    print("📈 Fetching IHSG...")
+    ihsg = get_ihsg()
+    if ihsg:
+        print(f"   IHSG: {ihsg['value']:,.2f} ({ihsg['change_pct']:+.2f}%)")
+
     output = {
         "generated_at":    now.strftime("%d %B %Y %H:%M WIB"),
         "date":            now.strftime("%d %B %Y"),
+        "ihsg":            ihsg,
         "total":           len(results),
         "execute_count":   sum(1 for r in results if r["decision"] == "EXECUTE"),
         "monitor_count":   sum(1 for r in results if r["decision"] == "MONITOR"),

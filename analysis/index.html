@@ -208,6 +208,13 @@
 <!-- Header -->
 <header>
   <h1>🤖 IDX AI Hedge Fund</h1>
+  <div id="ihsg-block" style="display:none;background:#1c2128;border:1px solid var(--border);border-radius:8px;padding:5px 14px;line-height:1.3">
+    <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px">IHSG</div>
+    <div style="display:flex;align-items:baseline;gap:6px">
+      <span id="ihsg-val" style="font-size:15px;font-weight:800">–</span>
+      <span id="ihsg-chg" style="font-size:11px;font-weight:700">–</span>
+    </div>
+  </div>
   <div style="display:flex;gap:16px;align-items:center;margin-left:auto">
     <a href="https://yazqe.github.io/idx-dashboard/" target="_blank" class="nav-link">📊 Scalping</a>
     <a href="https://yazqe.github.io/idx-dashboard/swing/" target="_blank" class="nav-link" style="color:#3fb950">📈 Swing</a>
@@ -715,6 +722,17 @@ async function load() {
 
     document.getElementById('gen-date').textContent  = d.date||'–';
     document.getElementById('gen-time').textContent  = d.generated_at;
+
+    // IHSG block
+    if (d.ihsg) {
+      const ihsg = d.ihsg;
+      const pos  = ihsg.change_pct >= 0;
+      document.getElementById('ihsg-val').textContent = Number(ihsg.value).toLocaleString('id-ID', {minimumFractionDigits:2, maximumFractionDigits:2});
+      const chgEl = document.getElementById('ihsg-chg');
+      chgEl.textContent = (pos?'+':'') + ihsg.change_pct.toFixed(2) + '%';
+      chgEl.style.color = pos ? 'var(--green)' : 'var(--red)';
+      document.getElementById('ihsg-block').style.display = 'block';
+    }
     document.getElementById('cnt-ex').textContent    = d.execute_count||0;
     document.getElementById('cnt-mo').textContent    = d.monitor_count||0;
     document.getElementById('cnt-pa').textContent    = d.pass_count||0;
