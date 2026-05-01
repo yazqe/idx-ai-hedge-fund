@@ -27,6 +27,7 @@ jobs:
       - name: Run batch analysis (top 10 IDX stocks)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SECRET_TOKEN: ${{ secrets.SECRET_TOKEN }}
         run: python batch_analysis.py
 
       - name: Commit results
