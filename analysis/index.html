@@ -158,6 +158,7 @@
   .analyst-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
   .analyst-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;border:1px solid;white-space:nowrap;cursor:default}
   .analyst-chip .ac-label{font-size:9px;opacity:.65;font-weight:700}
+  .analyst-chip .ac-conf{font-size:9px;opacity:.7;margin-left:3px}
 
   /* Analyst detail table — expanded body only */
   .analyst-table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
@@ -554,10 +555,10 @@ function renderStock(r) {
              sigLabel:s?(SL[s.signal]||s.signal):'–', conf };
   });
 
-  // Header: compact chips (abbr + signal, no repeating labels)
+  // Header: compact chips (abbr + signal + confidence %)
   const analystChips = `<div class="analyst-chips">${
-    _adata.map(a=>`<span class="analyst-chip ${a.sigCls}" title="${a.label}: ${a.sigLabel}${a.conf?' · '+a.conf+'%':''}">
-      <span class="ac-label">${a.abbr}</span>${a.sigLabel}</span>`).join('')
+    _adata.map(a=>`<span class="analyst-chip ${a.sigCls}" title="${a.label}">
+      <span class="ac-label">${a.abbr}</span>${a.sigLabel}${a.conf?`<span class="ac-conf">${a.conf}%</span>`:''}</span>`).join('')
   }</div>`;
 
   // Body: full detail table with confidence
