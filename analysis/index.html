@@ -99,7 +99,7 @@
   .stock-card.monitor{border-left:4px solid var(--gold-border)}
   .stock-card.pass_{border-left:4px solid var(--border)}
 
-  .sc-header{padding:14px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;cursor:pointer;transition:background .15s}
+  .sc-header{padding:14px 18px 12px;display:flex;flex-direction:column;gap:0;cursor:pointer;transition:background .15s}
   .sc-header:hover{background:var(--bg)}
   .sc-ticker{font-size:18px;font-weight:800;color:var(--text)}
   .badge{padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid}
@@ -148,11 +148,16 @@
   .debate-bull{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
   .debate-bear{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
   .debate-neu{background:var(--bg);color:var(--muted);border-color:var(--border)}
-  .analyst-table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:12px}
-  .analyst-table th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;padding:5px 8px;border-bottom:1px solid var(--border)}
-  .analyst-table td{padding:6px 8px;border-bottom:1px solid var(--border)}
-  .analyst-table tr:last-child td{border-bottom:none}
-  .conf-bar{display:inline-block;height:6px;border-radius:3px;background:var(--blue);vertical-align:middle;margin-left:6px;opacity:.7}
+  /* Analyst 4-column grid (always-visible in header) */
+  .analyst-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+  .ag-cell{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 6px;text-align:center;min-width:0}
+  .ag-name{font-size:10px;color:var(--muted);font-weight:700;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ag-signal{display:flex;justify-content:center;margin-bottom:4px}
+  .ag-signal .chip{font-size:10px;white-space:nowrap}
+  .ag-conf{font-size:10px;color:var(--muted)}
+  .ag-conf-bar{display:block;height:4px;border-radius:2px;background:var(--blue);margin:3px auto 0;opacity:.5}
+  @media(max-width:600px){.analyst-grid{grid-template-columns:repeat(2,1fr)}}
+
   .metric-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
   .metric-box{flex:1;min-width:90px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px}
   .metric-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;margin-bottom:2px}
@@ -447,11 +452,20 @@ function renderStock(r) {
   const icon = r.decision==='EXECUTE'?'✅':r.decision==='MONITOR'?'👀':'⛔';
   const bdg  = `badge-${r.decision==='EXECUTE'?'execute':r.decision==='MONITOR'?'monitor':'pass'}`;
 
-  // Analyst chips (header row)
-  const chips = (r.analyst_signals||[]).map(s=>{
-    const conf = s.confidence != null ? ` ${(s.confidence*100).toFixed(0)}%` : '';
-    const name = (ANALYST_LABELS[s.type?.toLowerCase()] || s.type || '?').replace(/^.*? /,''); // strip emoji
-    return `<span class="chip ${chipClass(s.signal)}" title="${s.type} analyst: ${SIGNAL_LABELS[s.signal]||s.signal}${conf} confidence">${name}${conf}</span>`;
+  // Analyst 4-column grid (fixed order so columns always align)
+  const ANALYST_ORDER = ['fundamental','technical','sentiment','macro'];
+  const analystGrid = ANALYST_ORDER.map(key => {
+    const s    = (r.analyst_signals||[]).find(x=>(x.type||'').toLowerCase()===key);
+    const conf = s?.confidence != null ? (s.confidence*100).toFixed(0) : null;
+    const sigCls   = s ? chipClass(s.signal) : 'chip-hold';
+    const sigLabel = s ? (SIGNAL_LABELS[s.signal]||s.signal) : '–';
+    const label    = ANALYST_LABELS[key];
+    const bar      = conf!=null ? `<span class="ag-conf-bar" style="width:${Math.round(conf*0.6)}px"></span>` : '';
+    return `<div class="ag-cell">
+      <div class="ag-name">${label}</div>
+      <div class="ag-signal"><span class="chip ${sigCls}">${sigLabel}</span></div>
+      <div class="ag-conf">${conf!=null?conf+'% conf':'no data'}${bar}</div>
+    </div>`;
   }).join('');
 
   // Trade parameter section
@@ -510,23 +524,6 @@ function renderStock(r) {
     </div>
   </div>`;
 
-  // Analyst breakdown table
-  const analystRows = (r.analyst_signals||[]).map(s=>{
-    const conf = s.confidence != null ? s.confidence*100 : null;
-    const confBar = conf!=null ? `<span class="conf-bar" style="width:${conf.toFixed(0)}px" title="${conf.toFixed(0)}% confidence"></span>` : '';
-    return `<tr>
-      <td style="font-weight:600">${ANALYST_LABELS[s.type?.toLowerCase()]||s.type}</td>
-      <td><span class="chip ${chipClass(s.signal)}">${SIGNAL_LABELS[s.signal]||s.signal}</span></td>
-      <td style="color:var(--muted)">${conf!=null?conf.toFixed(0)+'%':'–'}${confBar}</td>
-    </tr>`;
-  }).join('');
-
-  const analystTable = analystRows ? `
-  <table class="analyst-table">
-    <thead><tr><th>Analyst</th><th>Signal</th><th>Confidence</th></tr></thead>
-    <tbody>${analystRows}</tbody>
-  </table>` : '';
-
   const flags = (r.risk_flags||[]).slice(0,4).map(f=>`<div class="flag">⚠️ ${f}</div>`).join('');
 
   return `<div class="stock-card ${cls}">
@@ -540,9 +537,9 @@ function renderStock(r) {
           <span class="price-chg ${clr(r.market_change)}">${sign(r.market_change)}${(r.market_change||0).toFixed(2)}% today</span>
         </div>
       </div>
-      <div class="sc-header-mid">
-        <span style="font-size:11px;color:var(--muted);font-weight:600">Analysts:</span>
-        <div class="sig-chips">${chips||'<span style="color:var(--muted);font-size:11px">–</span>'}</div>
+      <div style="padding:8px 18px 0">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">Analyst Signals</div>
+        <div class="analyst-grid">${analystGrid}</div>
       </div>
       <div class="sc-header-bot">
         ${debatePill(r.debate_winner, r.debate_consensus)}
@@ -552,7 +549,6 @@ function renderStock(r) {
     </div>
     <div class="sc-body">
       ${tradeGrid}
-      ${analystTable}
       <div class="debate-box"><strong>⚔️ Bull vs Bear Debate:</strong><br>${r.debate_summary||'–'}</div>
       <div class="reasoning-box"><strong>📋 Portfolio Manager Decision:</strong><br>${r.reasoning||'–'}</div>
       ${flags ? `<div class="flags-box" style="margin-top:8px">${flags}</div>` : ''}
