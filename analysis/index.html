@@ -70,11 +70,18 @@
   .dashed-arrow{border-top:1.5px dashed var(--muted);width:48px}
 
   /* ── Stats bar ── */
-  .stats-bar{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--card)}
-  .stat-item{flex:1;padding:14px 24px;text-align:center;border-right:1px solid var(--border)}
+  .stats-bar{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--card);flex-wrap:wrap}
+  .stat-item{flex:1;min-width:80px;padding:14px 16px;text-align:center;border-right:1px solid var(--border)}
   .stat-item:last-child{border-right:none}
-  .stat-num{font-size:28px;font-weight:800}
-  .stat-label{font-size:11px;color:var(--muted);margin-top:2px;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+  .stat-num{font-size:24px;font-weight:800}
+  .stat-label{font-size:10px;color:var(--muted);margin-top:2px;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+
+  /* ── Source filter bar ── */
+  .filter-bar{display:flex;gap:8px;padding:12px 32px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+  .filter-label{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
+  .filter-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .15s}
+  .filter-btn:hover{border-color:var(--blue);color:var(--blue)}
+  .filter-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 
   /* ── Results ── */
   main{padding:24px 32px;display:grid;gap:16px;max-width:1100px;margin:0 auto}
@@ -127,6 +134,13 @@
   .reasoning-box{background:var(--bg);border:1px solid var(--gold-border);border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.6;color:var(--text);margin-bottom:10px}
   .flags-box{display:flex;flex-direction:column;gap:4px}
   .flag{font-size:11px;color:var(--red);background:var(--red-bg);border:1px solid var(--red-border);border-radius:6px;padding:4px 10px}
+
+  /* Source badges */
+  .src-badge{font-size:9px;padding:1px 6px;border-radius:10px;border:1px solid;font-weight:700;letter-spacing:.3px}
+  .src-value{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)}
+  .src-gainer{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
+  .src-frequency{background:var(--purple-bg);color:var(--purple);border-color:var(--purple-border)}
+  .src-custom{background:var(--bg);color:var(--muted);border-color:var(--border)}
 
   .pos{color:var(--green)}.neg{color:var(--red)}.neu{color:var(--muted)}
   .loading{text-align:center;padding:60px;color:var(--muted)}
@@ -360,10 +374,32 @@
     <div class="stat-num" style="color:var(--muted)" id="cnt-pa">–</div>
     <div class="stat-label">⛔ Pass</div>
   </div>
-  <div class="stat-item">
-    <div class="stat-num" style="color:var(--blue)" id="cnt-tot">–</div>
-    <div class="stat-label">📊 Total Analyzed</div>
+  <div class="stat-item" style="border-left:2px solid var(--border)">
+    <div class="stat-num" style="color:var(--blue)" id="cnt-val">–</div>
+    <div class="stat-label">💰 Top Value</div>
   </div>
+  <div class="stat-item">
+    <div class="stat-num" style="color:var(--green)" id="cnt-gain">–</div>
+    <div class="stat-label">📈 Top Gainers</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" style="color:var(--purple)" id="cnt-freq">–</div>
+    <div class="stat-label">🔄 Frequency</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" style="color:var(--muted)" id="cnt-tot">–</div>
+    <div class="stat-label">📊 Total</div>
+  </div>
+</div>
+
+<!-- Filter bar -->
+<div class="filter-bar" id="filter-bar">
+  <span class="filter-label">Filter by source:</span>
+  <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+  <button class="filter-btn" onclick="setFilter('VALUE',this)">💰 Top Value</button>
+  <button class="filter-btn" onclick="setFilter('GAINER',this)">📈 Top Gainers</button>
+  <button class="filter-btn" onclick="setFilter('FREQUENCY',this)">🔄 Frequency</button>
+  <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="filter-count"></span>
 </div>
 
 <!-- Batch tab wrapper -->
@@ -377,6 +413,15 @@ const fmt  = (n,d=0) => n==null?'–':Number(n).toLocaleString('id-ID',{minimumF
 const clr  = p => p>0?'pos':p<0?'neg':'neu';
 const sign = p => p>0?'+':'';
 const DATA_URL = './data/latest.json';
+let _allResults = [];
+let _activeFilter = 'all';
+
+const SRC_META = {
+  VALUE:     {cls:'src-value',     label:'💰 Value'},
+  GAINER:    {cls:'src-gainer',    label:'📈 Gainer'},
+  FREQUENCY: {cls:'src-frequency', label:'🔄 Freq'},
+  CUSTOM:    {cls:'src-custom',    label:'Custom'},
+};
 
 function chipClass(s) {
   return {STRONG_BUY:'chip-sbuy',BUY:'chip-buy',HOLD:'chip-hold',
@@ -532,6 +577,9 @@ function renderStock(r) {
         <span class="sc-ticker">${r.ticker}</span>
         <span class="badge ${bdg}">${icon} ${r.decision}</span>
         <span style="font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 8px;color:var(--muted)">${r.sector||'–'}</span>
+        <div style="display:flex;gap:4px;align-items:center">
+          ${(r.sources||[]).map(s=>`<span class="src-badge ${(SRC_META[s]||{cls:'src-custom'}).cls}">${(SRC_META[s]||{label:s}).label}</span>`).join('')}
+        </div>
         <div class="price-block">
           <span class="price-main">Rp${fmt(r.market_price)}</span>
           <span class="price-chg ${clr(r.market_change)}">${sign(r.market_change)}${(r.market_change||0).toFixed(2)}% today</span>
@@ -557,26 +605,45 @@ function renderStock(r) {
   </div>`;
 }
 
+function renderCards(results) {
+  const filtered = _activeFilter === 'all'
+    ? results
+    : results.filter(r => (r.sources||[]).includes(_activeFilter));
+  const fc = document.getElementById('filter-count');
+  if (fc) fc.textContent = _activeFilter === 'all' ? '' : `${filtered.length} saham`;
+  document.getElementById('main').innerHTML =
+    renderSummarySection(filtered) +
+    `<div style="font-size:12px;color:var(--muted)">
+      ${filtered.length} saham · klik kartu untuk detail lengkap
+    </div>` +
+    filtered.map(renderStock).join('');
+}
+
+function setFilter(src, btn) {
+  _activeFilter = src;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards(_allResults);
+}
+
 async function load() {
   try {
     const r = await fetch(DATA_URL + '?t=' + Date.now());
     if (!r.ok) throw new Error();
     const d = await r.json();
 
-    document.getElementById('gen-date').textContent = d.date||'–';
-    document.getElementById('gen-time').textContent = d.generated_at;
-    document.getElementById('cnt-ex').textContent   = d.execute_count||0;
-    document.getElementById('cnt-mo').textContent   = d.monitor_count||0;
-    document.getElementById('cnt-pa').textContent   = d.pass_count||0;
-    document.getElementById('cnt-tot').textContent  = d.total||0;
+    document.getElementById('gen-date').textContent  = d.date||'–';
+    document.getElementById('gen-time').textContent  = d.generated_at;
+    document.getElementById('cnt-ex').textContent    = d.execute_count||0;
+    document.getElementById('cnt-mo').textContent    = d.monitor_count||0;
+    document.getElementById('cnt-pa').textContent    = d.pass_count||0;
+    document.getElementById('cnt-tot').textContent   = d.total||0;
+    document.getElementById('cnt-val').textContent   = d.value_count   ?? (d.results||[]).filter(r=>(r.sources||[]).includes('VALUE')).length;
+    document.getElementById('cnt-gain').textContent  = d.gainer_count  ?? (d.results||[]).filter(r=>(r.sources||[]).includes('GAINER')).length;
+    document.getElementById('cnt-freq').textContent  = d.frequency_count?? (d.results||[]).filter(r=>(r.sources||[]).includes('FREQUENCY')).length;
 
-    const results = d.results||[];
-    document.getElementById('main').innerHTML =
-      renderSummarySection(results) +
-      `<div style="font-size:12px;color:var(--muted)">
-        ${results.length} saham dianalisis · klik untuk detail lengkap
-      </div>` +
-      results.map(renderStock).join('');
+    _allResults = d.results||[];
+    renderCards(_allResults);
   } catch(e) {
     document.getElementById('main').innerHTML = `
       <div class="loading">
@@ -598,6 +665,8 @@ function switchTab(name, el) {
   // show/hide stats bar (only for batch)
   const sb = document.getElementById('stats-bar');
   if (sb) sb.style.display = name==='batch' ? 'flex' : 'none';
+  const fb = document.getElementById('filter-bar');
+  if (fb) fb.style.display = name==='batch' ? 'flex' : 'none';
 }
 
 // ── Analyze Ticker ─────────────────────────────────────────────

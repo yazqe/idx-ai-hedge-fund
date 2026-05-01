@@ -43,8 +43,33 @@ def get_top_value_stocks(n=12):
     return result
 
 
-def get_top_candidates(n=15):
-    """Legacy: intersection approach (kept for compatibility)."""
+def get_top_gainers(n=5):
+    """Get top IDX stocks by % price gain today."""
+    r = requests.post(SCANNER_URL, headers=HEADERS, json={
+        "filter": [
+            {"left": "change", "operation": "greater", "right": 2},
+            {"left": "volume", "operation": "greater", "right": 5_000_000},
+        ],
+        "symbols": {"query": {"types": ["stock"]}},
+        "columns": ["name", "close", "change", "volume", "Value.Traded"],
+        "sort":    {"sortBy": "change", "sortOrder": "desc"},
+        "range":   [0, n + 5]
+    }, timeout=15)
+    if r.status_code != 200:
+        return []
+    result = []
+    for item in r.json().get("data", []):
+        code = item["d"][0].replace("IDX:", "")
+        if code in SUSPENDED:
+            continue
+        result.append(code)
+        if len(result) >= n:
+            break
+    return result
+
+
+def get_top_frequency(n=5):
+    """Get top IDX stocks by cross-list frequency (gainers + volume + value intersection)."""
     def scan(sort_by, filters=None):
         r = requests.post(SCANNER_URL, headers=HEADERS, json={
             "filter": filters or [],
@@ -55,25 +80,22 @@ def get_top_candidates(n=15):
         }, timeout=15)
         if r.status_code != 200:
             return []
-        return [(item["d"][0].replace("IDX:", ""), item["d"][2], item["d"][3])
+        return [item["d"][0].replace("IDX:", "")
                 for item in r.json().get("data", [])
                 if item["d"][0].replace("IDX:", "") not in SUSPENDED
                 and (item["d"][3] or 0) > 10_000_000]
 
-    gainers = {c: chg for c, chg, _ in scan("change", [
-        {"left": "change", "operation": "greater", "right": 3},
+    gainers = scan("change", [
+        {"left": "change", "operation": "greater", "right": 2},
         {"left": "volume", "operation": "greater", "right": 10_000_000},
-    ])}
-    volume_stocks = {c for c, _, _ in scan("volume")}
-    value_stocks  = {c for c, _, _ in scan("Value.Traded")}
+    ])
+    volume_stocks = scan("volume")
+    value_stocks  = scan("Value.Traded")
 
     scores = {}
-    for c, chg in gainers.items():
-        scores[c] = scores.get(c, 0) + 1 + (chg / 100)
-    for c in volume_stocks:
-        scores[c] = scores.get(c, 0) + 1
-    for c in value_stocks:
-        scores[c] = scores.get(c, 0) + 1
+    for c in gainers:      scores[c] = scores.get(c, 0) + 2
+    for c in volume_stocks: scores[c] = scores.get(c, 0) + 1
+    for c in value_stocks:  scores[c] = scores.get(c, 0) + 1
 
     ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     return [c for c, _ in ranked[:n]]
@@ -134,16 +156,35 @@ def main(tickers=None):
     print(f"\n🤖 IDX AI Hedge Fund — Batch Analysis")
     print(f"   {now.strftime('%d %B %Y %H:%M WIB')}\n")
 
+    sources_map = {}  # ticker → list of source tags
+
     if not tickers:
         print("📊 Fetching top IDX stocks by trading VALUE (most liquid)...")
-        tickers = get_top_value_stocks(10)
-        print(f"   Top Value: {', '.join(tickers)}\n")
+        value_list = get_top_value_stocks(10)
+        print(f"   Top Value:     {', '.join(value_list)}")
+
+        print("📈 Fetching top IDX gainers (% change today)...")
+        gainer_list = get_top_gainers(5)
+        print(f"   Top Gainers:   {', '.join(gainer_list) or 'none'}")
+
+        print("🔄 Fetching top IDX by frequency (cross-list score)...")
+        freq_list = get_top_frequency(5)
+        print(f"   Top Frequency: {', '.join(freq_list) or 'none'}\n")
+
+        for t in value_list:  sources_map.setdefault(t, []).append("VALUE")
+        for t in gainer_list: sources_map.setdefault(t, []).append("GAINER")
+        for t in freq_list:   sources_map.setdefault(t, []).append("FREQUENCY")
+        tickers = list(sources_map.keys())
+    else:
+        for t in tickers:
+            sources_map[t] = ["CUSTOM"]
 
     results = []
     for i, ticker in enumerate(tickers, 1):
-        print(f"[{i}/{len(tickers)}] Analyzing {ticker}...")
+        print(f"[{i}/{len(tickers)}] Analyzing {ticker} ({', '.join(sources_map.get(ticker, []))})...")
         result = run_analysis(ticker)
         if result:
+            result["sources"] = sources_map.get(ticker, [])
             results.append(result)
             icon = {"EXECUTE": "✅", "MONITOR": "👀", "PASS": "⛔"}.get(result["decision"], "❓")
             print(f"  {icon} {result['decision']} — {result['debate_consensus']} | Risk: {result['risk_level']}")
@@ -154,13 +195,16 @@ def main(tickers=None):
     results.sort(key=lambda x: (order.get(x["decision"], 3), x.get("position_size", 0) * -1))
 
     output = {
-        "generated_at": now.strftime("%d %B %Y %H:%M WIB"),
-        "date":         now.strftime("%d %B %Y"),
-        "total":        len(results),
-        "execute_count": sum(1 for r in results if r["decision"] == "EXECUTE"),
-        "monitor_count": sum(1 for r in results if r["decision"] == "MONITOR"),
-        "pass_count":    sum(1 for r in results if r["decision"] == "PASS"),
-        "results":      results,
+        "generated_at":    now.strftime("%d %B %Y %H:%M WIB"),
+        "date":            now.strftime("%d %B %Y"),
+        "total":           len(results),
+        "execute_count":   sum(1 for r in results if r["decision"] == "EXECUTE"),
+        "monitor_count":   sum(1 for r in results if r["decision"] == "MONITOR"),
+        "pass_count":      sum(1 for r in results if r["decision"] == "PASS"),
+        "value_count":     sum(1 for r in results if "VALUE"     in r.get("sources", [])),
+        "gainer_count":    sum(1 for r in results if "GAINER"    in r.get("sources", [])),
+        "frequency_count": sum(1 for r in results if "FREQUENCY" in r.get("sources", [])),
+        "results":         results,
     }
 
     out_file = OUT_DIR / "latest.json"
