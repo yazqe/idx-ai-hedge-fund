@@ -52,10 +52,7 @@
   .debate-node{background:var(--card);border:1.5px solid var(--orange-border);border-radius:10px;padding:10px 24px;text-align:center;min-width:190px;display:flex;align-items:center;justify-content:center}
   .debate-arrows{display:flex;flex-direction:column;align-items:center;padding:0 8px;gap:6px;color:var(--orange);font-size:16px}
   .arrow{display:flex;flex-direction:column;align-items:center;color:var(--muted);font-size:20px;line-height:1;padding:4px 0}
-  .arch-with-log{display:flex;gap:16px;align-items:center;justify-content:center;width:100%;max-width:800px}
-  .log-node{display:flex;flex-direction:column;align-items:center;gap:4px}
-  .log-dashed{border:1.5px dashed var(--muted);border-radius:8px;padding:8px 14px;text-align:center;min-width:100px;font-size:11px;color:var(--muted)}
-  .dashed-arrow{border-top:1.5px dashed var(--muted);width:48px}
+  .arch-with-log{display:flex;justify-content:center;width:100%}
 
   /* ── Stats bar ── */
   .stats-bar{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--card);flex-wrap:wrap}
@@ -259,13 +256,6 @@
         <div class="node node-purple" style="min-width:280px">
           <div class="node-title">👔 Portfolio Manager</div>
           <div class="node-sub">APPROVE / REJECT + explanation</div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:0;margin-top:60px">
-        <div class="dashed-arrow"></div>
-        <div class="log-node">
-          <div class="log-dashed"><div style="font-size:13px;margin-bottom:2px">📝 Decision</div><div>Log</div><div style="margin-top:2px;color:#8c959f">Markdown</div></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px;text-align:center">reflection injected</div>
         </div>
       </div>
     </div>
