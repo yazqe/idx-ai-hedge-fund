@@ -40,13 +40,25 @@ def _normalize_report(d: dict) -> dict:
         elif field == "action" and d.get(field) is None:
             pass  # Optional field, keep as None
 
-    # Normalize risk_level to uppercase
+    # Normalize risk_level
+    _risk_map = {
+        "CRITICAL": "REJECT", "EXTREME": "REJECT", "VERY_HIGH": "HIGH",
+        "VERY HIGH": "HIGH", "LOW_RISK": "LOW", "MEDIUM_RISK": "MEDIUM",
+        "HIGH_RISK": "HIGH", "MODERATE": "MEDIUM",
+    }
+    _valid_risks = {"LOW", "MEDIUM", "HIGH", "REJECT"}
     if "risk_level" in d and isinstance(d["risk_level"], str):
-        d["risk_level"] = d["risk_level"].strip().upper()
+        val = d["risk_level"].strip().upper().replace(" ", "_")
+        d["risk_level"] = _risk_map.get(val, val if val in _valid_risks else "HIGH")
 
-    # Normalize adjustments: list → string
-    if "adjustments" in d and isinstance(d["adjustments"], list):
-        d["adjustments"] = " | ".join(str(x) for x in d["adjustments"])
+    # Normalize string fields that LLM might return as dict/list
+    for str_field in ("adjustments", "portfolio_context", "reasoning", "rationale", "summary"):
+        if str_field in d:
+            val = d[str_field]
+            if isinstance(val, list):
+                d[str_field] = " | ".join(str(x) for x in val)
+            elif isinstance(val, dict):
+                d[str_field] = " | ".join(f"{k}: {v}" for k, v in val.items())
 
     # Normalize decision to uppercase
     if "decision" in d and isinstance(d["decision"], str):
