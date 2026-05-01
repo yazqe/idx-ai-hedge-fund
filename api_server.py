@@ -2,13 +2,14 @@
 import json, threading
 from datetime import datetime
 from pathlib import Path
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file, redirect
 from flask_cors import CORS
 import pytz
 
-WIB = pytz.timezone('Asia/Jakarta')
-app = Flask(__name__)
-CORS(app)  # allow GitHub Pages → localhost calls
+WIB  = pytz.timezone('Asia/Jakarta')
+ROOT = Path(__file__).parent
+app  = Flask(__name__, static_folder=str(ROOT / "analysis"), static_url_path="/static")
+CORS(app)
 
 _running: dict = {}   # ticker → "running" | "done" | "error"
 _results: dict = {}   # ticker → result dict
@@ -47,6 +48,16 @@ def result(ticker: str):
 @app.route("/api/health")
 def health():
     return jsonify({"ok": True, "time": datetime.now(WIB).strftime("%H:%M WIB")})
+
+
+@app.route("/")
+def index():
+    """Serve dashboard locally — no mixed-content issues."""
+    return send_file(ROOT / "analysis" / "index.html")
+
+@app.route("/data/latest.json")
+def latest_json():
+    return send_file(ROOT / "analysis" / "data" / "latest.json")
 
 
 if __name__ == "__main__":
