@@ -1,0 +1,157 @@
+{
+  "generated_at": "01 May 2026 15:23 WIB",
+  "date": "01 May 2026",
+  "total": 3,
+  "execute_count": 0,
+  "monitor_count": 0,
+  "pass_count": 3,
+  "results": [
+    {
+      "ticker": "BBCA",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": null,
+      "target_price": 6250.0,
+      "stop_loss": 5500.0,
+      "position_size": 0.0,
+      "reasoning": "BBCA presents a fundamental-technical disconnect that cannot be resolved without external confirmation. While fundamentals are strong (P/E 12.53x, ROE 22.97%, 82% BUY consensus), the 92% STRONG_SELL technical signal and severely oversold RSI (19.64) create unacceptable risk conditions. The R/R ratio of 1.14x falls below the mandatory 1.5x threshold, making entry mathematically unjustifiable. Initiating a position now violates established risk discipline despite fundamental appeal. The portfolio'",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "BUY",
+          "confidence": 0.82
+        },
+        {
+          "type": "technical",
+          "signal": "STRONG_SELL",
+          "confidence": 0.92
+        },
+        {
+          "type": "sentiment",
+          "signal": "HOLD",
+          "confidence": 0.65
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.72
+        }
+      ],
+      "debate_consensus": "HOLD",
+      "debate_winner": null,
+      "debate_summary": "# BBCA Debate Summary\n\nThe bull case argues BBCA's 40% decline represents panic-driven capitulation in a fundamentally sound business, with industry-leading ROE (22.97%), attractive valuation (12.53x P/E), and upcoming rate cuts poised to expand compressed margins. The bear counters that technical o",
+      "risk_level": "HIGH",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio 1.14x below 1.5x minimum threshold",
+        "RSI 19.64 indicates oversold condition with uncertain recovery timing",
+        "Risk/reward ratio insufficient to justify trade entry at current levels",
+        "No active position - hold recommendation without existing exposure"
+      ],
+      "market_price": 5850.0,
+      "market_change": -2.0920503,
+      "sector": "Financial Services",
+      "rsi": 19.64,
+      "analyzed_at": "01 May 2026 15:25 WIB"
+    },
+    {
+      "ticker": "BUMI",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": null,
+      "target_price": 195.0,
+      "stop_loss": null,
+      "position_size": 0.0,
+      "reasoning": "Trade rejected on multiple quantitative and structural grounds. Critical violations: (1) R/R ratio of -45x severely violates 1.5x minimum threshold and core portfolio doctrine requiring positive asymmetry on shorts; (2) Debt/Equity ratio of 15.1x is 5x above 3.0x policy maximum, indicating extreme financial distress and forced liquidation risk incompatible with equity fund mandate; (3) Entry price Rp240 positioned above weak technical setup (RSI 46.67 neutral, below-average volume); (4) 30-day h",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.92
+        },
+        {
+          "type": "technical",
+          "signal": "HOLD",
+          "confidence": 0.62
+        },
+        {
+          "type": "sentiment",
+          "signal": "HOLD",
+          "confidence": 0.55
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.65
+        }
+      ],
+      "debate_consensus": "SELL",
+      "debate_winner": "BEAR",
+      "debate_summary": "# BUMI Debate Summary\n\n**Bulls argue BUMI's 50% drawdown represents capitulation creating an asymmetric risk/reward opportunity, with technical support and macro tailwinds signaling a reversal, while bears contend the decline rationally reflects deteriorated fundamentals (negative revenue, unsustain",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio -45.00x severely violates 1.5x minimum threshold",
+        "Debt/equity ratio 15.1 far exceeds 3.0 maximum threshold",
+        "Short position with undefined upside risk in volatile equity",
+        "Entry price Rp240 above current trend with weak RSI 46.67",
+        "30-day hold period insufficient for recovery risk management"
+      ],
+      "market_price": 240.0,
+      "market_change": 4.347826,
+      "sector": "Energy",
+      "rsi": 46.67,
+      "analyzed_at": "01 May 2026 15:26 WIB"
+    },
+    {
+      "ticker": "GOTO",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": 54.0,
+      "target_price": 38.0,
+      "stop_loss": 62.0,
+      "position_size": 0.0,
+      "reasoning": "Trade REJECTED on structural risk grounds despite valid bearish thesis. D/E ratio of 27.75x is a disqualifying hard stop—far exceeds 3.0x maximum threshold and indicates acute financial distress. Negative ROE combined with extreme leverage creates compounding risk in rising rate environment (BI 6.0%). Risk/reward ratio of -16.00x is mechanically broken: 14.81% max loss vs 22.22% potential gain creates inverted asymmetry that violates 1.5x minimum threshold. Short position in high-volatility tech",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "sentiment",
+          "signal": "SELL",
+          "confidence": 0.65
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.65
+        }
+      ],
+      "debate_consensus": "SELL",
+      "debate_winner": "BEAR",
+      "debate_summary": "# GOTO Debate Summary\n\n**Bulls** argue GOTO's collapsed valuation presents a contrarian buying opportunity, claiming the market has overcorrected by pricing in permanent damage when operational momentum and sector dynamics suggest cyclical recovery. **Bears** counter that the collapse is justified, ",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio -16.00x violates 1.5x minimum threshold",
+        "D/E ratio 27.754 far exceeds 3.0 maximum",
+        "Negative R/R ratio indicates loss-centric trade structure",
+        "Max loss (Rp62 vs Rp54 entry) exceeds 8% drawdown tolerance at 14.81%",
+        "Short position in high-volatility tech stock increases risk asymmetry",
+        "Debt-to-equity ratio suggests financial distress and elevated bankruptcy risk"
+      ],
+      "market_price": 54.0,
+      "market_change": -1.8181819,
+      "sector": "Technology",
+      "rsi": 58.33,
+      "analyzed_at": "01 May 2026 15:27 WIB"
+    }
+  ]
+}
