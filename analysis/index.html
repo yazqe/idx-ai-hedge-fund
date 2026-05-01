@@ -157,8 +157,9 @@
   /* Compact analyst chips — header only */
   .analyst-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
   .analyst-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;border:1px solid;white-space:nowrap;cursor:default}
-  .analyst-chip .ac-label{font-size:9px;opacity:.65;font-weight:700}
-  .analyst-chip .ac-conf{font-size:9px;opacity:.7;margin-left:3px}
+  .analyst-chip .ac-label{font-size:10px;font-weight:700;opacity:.8}
+  .analyst-chip .ac-sep{opacity:.4;margin:0 3px}
+  .analyst-chip .ac-conf{font-size:9px;opacity:.65;margin-left:4px}
 
   /* Analyst detail table — expanded body only */
   .analyst-table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
@@ -547,7 +548,12 @@ function renderStock(r) {
   const SM = SRC_META_fn();
 
   const ANALYST_ORDER = ['fundamental','technical','sentiment','macro'];
-  const ABBR = {fundamental:'F', technical:'T', sentiment:'S', macro:'M'};
+  const ABBR = {
+    fundamental: LANG==='id'?'📊 Fund.':'📊 Fund.',
+    technical:   LANG==='id'?'📉 Teknikal':'📉 Technical',
+    sentiment:   LANG==='id'?'💬 Sentimen':'💬 Sentiment',
+    macro:       '📰 Makro',
+  };
   const _adata = ANALYST_ORDER.map(key => {
     const s    = (r.analyst_signals||[]).find(x=>(x.type||'').toLowerCase()===key);
     const conf = s?.confidence != null ? (s.confidence*100).toFixed(0) : null;
@@ -555,10 +561,12 @@ function renderStock(r) {
              sigLabel:s?(SL[s.signal]||s.signal):'–', conf };
   });
 
-  // Header: compact chips (abbr + signal + confidence %)
+  // Header: compact chips — category name · signal · confidence
   const analystChips = `<div class="analyst-chips">${
-    _adata.map(a=>`<span class="analyst-chip ${a.sigCls}" title="${a.label}">
-      <span class="ac-label">${a.abbr}</span>${a.sigLabel}${a.conf?`<span class="ac-conf">${a.conf}%</span>`:''}</span>`).join('')
+    _adata.map(a=>`<span class="analyst-chip ${a.sigCls}">
+      <span class="ac-label">${a.abbr}</span>
+      <span class="ac-sep">·</span>
+      ${a.sigLabel}${a.conf?`<span class="ac-conf">${a.conf}%</span>`:''}</span>`).join('')
   }</div>`;
 
   // Body: full detail table with confidence
