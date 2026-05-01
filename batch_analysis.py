@@ -18,8 +18,33 @@ HEADERS = {
 SUSPENDED = {"WBSA", "BAPA"}
 
 
+def get_top_value_stocks(n=12):
+    """Get top IDX stocks by trading value (most liquid — institutional focus)."""
+    r = requests.post(SCANNER_URL, headers=HEADERS, json={
+        "filter": [
+            {"left": "Value.Traded", "operation": "greater", "right": 50_000_000_000},  # min Rp50B
+            {"left": "volume",       "operation": "greater", "right": 5_000_000},
+        ],
+        "symbols": {"query": {"types": ["stock"]}},
+        "columns": ["name", "close", "change", "volume", "Value.Traded"],
+        "sort":    {"sortBy": "Value.Traded", "sortOrder": "desc"},
+        "range":   [0, n + 5]
+    }, timeout=15)
+    if r.status_code != 200:
+        return []
+    result = []
+    for item in r.json().get("data", []):
+        code = item["d"][0].replace("IDX:", "")
+        if code in SUSPENDED:
+            continue
+        result.append(code)
+        if len(result) >= n:
+            break
+    return result
+
+
 def get_top_candidates(n=15):
-    """Get top IDX stocks by combining gainers + volume + value intersection."""
+    """Legacy: intersection approach (kept for compatibility)."""
     def scan(sort_by, filters=None):
         r = requests.post(SCANNER_URL, headers=HEADERS, json={
             "filter": filters or [],
@@ -33,7 +58,7 @@ def get_top_candidates(n=15):
         return [(item["d"][0].replace("IDX:", ""), item["d"][2], item["d"][3])
                 for item in r.json().get("data", [])
                 if item["d"][0].replace("IDX:", "") not in SUSPENDED
-                and (item["d"][3] or 0) > 10_000_000]  # min 10M volume
+                and (item["d"][3] or 0) > 10_000_000]
 
     gainers = {c: chg for c, chg, _ in scan("change", [
         {"left": "change", "operation": "greater", "right": 3},
@@ -42,10 +67,9 @@ def get_top_candidates(n=15):
     volume_stocks = {c for c, _, _ in scan("volume")}
     value_stocks  = {c for c, _, _ in scan("Value.Traded")}
 
-    # Score: triple=3, double=2, single=1
     scores = {}
     for c, chg in gainers.items():
-        scores[c] = scores.get(c, 0) + 1 + (chg / 100)  # weight by gain %
+        scores[c] = scores.get(c, 0) + 1 + (chg / 100)
     for c in volume_stocks:
         scores[c] = scores.get(c, 0) + 1
     for c in value_stocks:
@@ -111,9 +135,9 @@ def main(tickers=None):
     print(f"   {now.strftime('%d %B %Y %H:%M WIB')}\n")
 
     if not tickers:
-        print("📊 Fetching top IDX candidates...")
-        tickers = get_top_candidates(12)
-        print(f"   Candidates: {', '.join(tickers)}\n")
+        print("📊 Fetching top IDX stocks by trading VALUE (most liquid)...")
+        tickers = get_top_value_stocks(10)
+        print(f"   Top Value: {', '.join(tickers)}\n")
 
     results = []
     for i, ticker in enumerate(tickers, 1):
