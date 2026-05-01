@@ -4,3 +4,5 @@ __pycache__/
 *.db
 memory/logs/
 .env
+certs/key.pem
+certs/cert.pem
