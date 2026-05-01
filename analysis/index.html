@@ -291,12 +291,6 @@
         <button class="quick-btn" onclick="setTicker('BMRI')">BMRI</button>
         <button class="quick-btn" onclick="setTicker('MDKA')">MDKA</button>
       </div>
-      <div class="local-only">
-        ⚡ <strong>Requires local API server.</strong> Jalankan di terminal:
-        <code style="display:block;margin-top:6px;background:rgba(0,0,0,.05);padding:6px 10px;border-radius:6px;font-family:monospace">
-          cd ~/idx-ai-hedge-fund && source .venv/bin/activate && python api_server.py
-        </code>
-      </div>
       <div class="status-box" id="status-box"></div>
       <div class="result-area" id="result-area"></div>
     </div>
@@ -677,16 +671,13 @@ async function runAnalysis() {
 
   document.getElementById('btn-run').disabled = true;
   document.getElementById('result-area').innerHTML = '';
-  setStatus('running', `⏳ Menghubungi local API server...`);
+  setStatus('running', `⏳ Menghubungi server...`);
 
   try {
     const r = await fetch(`${LOCAL_API}/api/health`, {signal: AbortSignal.timeout(3000)});
     if (!r.ok) throw new Error();
   } catch(e) {
-    setStatus('error', `❌ Local API server tidak berjalan.<br>
-      <code style="font-size:11px;display:block;margin-top:6px;background:rgba(0,0,0,.06);padding:6px;border-radius:4px">
-        cd ~/idx-ai-hedge-fund && source .venv/bin/activate && python api_server.py
-      </code>`);
+    setStatus('error', `❌ Analisis tidak tersedia saat ini. Silakan coba beberapa saat lagi.`);
     document.getElementById('btn-run').disabled = false;
     return;
   }
