@@ -28,19 +28,19 @@ Every stage writes in plain English. Every decision is traceable.
 
 | | Agent | Focuses on |
 |---|---|---|
-| 📊 | [Fundamental](https://www.investopedia.com/terms/f/fundamentalanalysis.asp) | Valuation, earnings quality, balance sheet |
-| 📉 | [Technical](https://www.investopedia.com/terms/t/technicalanalysis.asp) | RSI, MACD, SMA, momentum signals |
-| 💬 | [Sentiment](https://www.investopedia.com/terms/m/marketsentiment.asp) | Market mood, crowd positioning |
-| 📰 | [Macro](https://www.investopedia.com/terms/m/macroeconomics.asp) | Sector rotation, BI rate, global events |
+| 📊 | [Fundamental](https://www.investopedia.com/terms/f/fundamentalanalysis.asp "Evaluates a company's intrinsic value using financial statements, ratios, earnings, and growth metrics to determine if a stock is under or overvalued.") | Valuation, earnings quality, balance sheet |
+| 📉 | [Technical](https://www.investopedia.com/terms/t/technicalanalysis.asp "Studies price charts and indicators like RSI, MACD, and moving averages to identify patterns and predict future price movement based on historical data.") | RSI, MACD, SMA, momentum signals |
+| 💬 | [Sentiment](https://www.investopedia.com/terms/m/marketsentiment.asp "Measures the overall attitude of investors toward a stock or market — bullish (optimistic) or bearish (pessimistic) — using news, social media, and crowd behavior.") | Market mood, crowd positioning |
+| 📰 | [Macro](https://www.investopedia.com/terms/m/macroeconomics.asp "Analyzes broad economic factors — interest rates, inflation, GDP, currency strength, and geopolitical events — that influence the overall market and specific sectors.") | Sector rotation, BI rate, global events |
 
 **Decision Layer** *(sequential)*
 
 | | Agent | Role |
 |---|---|---|
-| 🐂🐻 | [Debate](https://www.investopedia.com/terms/b/bull.asp) | Bull vs Bear argue N rounds using analyst evidence |
-| 👨‍💼 | [Trader](https://www.investopedia.com/terms/t/trader.asp) | Converts debate into a trade proposal |
-| ⚠️ | [Risk Manager](https://www.investopedia.com/terms/r/riskmanagement.asp) | Validates exposure, volatility, position size |
-| 👔 | [Portfolio Manager](https://www.investopedia.com/terms/p/portfoliomanager.asp) | Final approval — **EXECUTE / MONITOR / PASS** |
+| 🐂🐻 | [Debate](https://www.investopedia.com/terms/b/bull.asp "Two researchers argue opposing sides — Bull (bullish case for buying) vs Bear (bearish case against) — for N configurable rounds, using analyst reports as evidence.") | Bull vs Bear argue N rounds using analyst evidence |
+| 👨‍💼 | [Trader](https://www.investopedia.com/terms/t/trader.asp "Reads all analyst reports and the debate transcript, then proposes a concrete trade: direction (buy/sell), entry price, target, stop-loss, and position size.") | Converts debate into a trade proposal |
+| ⚠️ | [Risk Manager](https://www.investopedia.com/terms/r/riskmanagement.asp "Acts as a gatekeeper — evaluates whether the proposed trade is safe given current volatility, liquidity, and portfolio exposure. Can veto the trade.") | Validates exposure, volatility, position size |
+| 👔 | [Portfolio Manager](https://www.investopedia.com/terms/p/portfoliomanager.asp "The final authority. Reads everything — analyst reports, debate, trade proposal, and risk review — then issues a written decision: EXECUTE, MONITOR, or PASS.") | Final approval — **EXECUTE / MONITOR / PASS** |
 
 ---
 
