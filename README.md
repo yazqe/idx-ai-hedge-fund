@@ -28,19 +28,19 @@ Every stage writes in plain English. Every decision is traceable.
 
 | | Agent | Focuses on |
 |---|---|---|
-| 📊 | Fundamental | Valuation, earnings quality, balance sheet |
-| 📉 | Technical | RSI, MACD, SMA, momentum signals |
-| 💬 | Sentiment | Market mood, crowd positioning |
-| 📰 | Macro | Sector rotation, BI rate, global events |
+| 📊 | [Fundamental](https://www.investopedia.com/terms/f/fundamentalanalysis.asp) | Valuation, earnings quality, balance sheet |
+| 📉 | [Technical](https://www.investopedia.com/terms/t/technicalanalysis.asp) | RSI, MACD, SMA, momentum signals |
+| 💬 | [Sentiment](https://www.investopedia.com/terms/m/marketsentiment.asp) | Market mood, crowd positioning |
+| 📰 | [Macro](https://www.investopedia.com/terms/m/macroeconomics.asp) | Sector rotation, BI rate, global events |
 
 **Decision Layer** *(sequential)*
 
 | | Agent | Role |
 |---|---|---|
-| 🐂🐻 | Debate | Bull vs Bear argue N rounds using analyst evidence |
-| 👨‍💼 | Trader | Converts debate into a trade proposal |
-| ⚠️ | Risk Manager | Validates exposure, volatility, position size |
-| 👔 | Portfolio Manager | Final approval — **EXECUTE / MONITOR / PASS** |
+| 🐂🐻 | [Debate](https://www.investopedia.com/terms/b/bull.asp) | Bull vs Bear argue N rounds using analyst evidence |
+| 👨‍💼 | [Trader](https://www.investopedia.com/terms/t/trader.asp) | Converts debate into a trade proposal |
+| ⚠️ | [Risk Manager](https://www.investopedia.com/terms/r/riskmanagement.asp) | Validates exposure, volatility, position size |
+| 👔 | [Portfolio Manager](https://www.investopedia.com/terms/p/portfoliomanager.asp) | Final approval — **EXECUTE / MONITOR / PASS** |
 
 ---
 
