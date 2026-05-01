@@ -48,18 +48,17 @@ def node_load_memory(state: HedgeFundState) -> HedgeFundState:
 
 def node_run_analysts(state: HedgeFundState) -> HedgeFundState:
     from schemas import MarketData
+    if state.get("error") or not state.get("market_data"):
+        return state
     data = MarketData(**state["market_data"])
-
-    async def _run_all():
-        return await asyncio.gather(
-            fundamental.analyze_async(data),
-            technical.analyze_async(data),
-            sentiment.analyze_async(data),
-            macro.analyze_async(data),
-        )
-
     try:
-        reports = asyncio.run(_run_all())
+        # Run sequentially to avoid asyncio event loop conflicts with LangGraph
+        reports = [
+            fundamental.analyze(data),
+            technical.analyze(data),
+            sentiment.analyze(data),
+            macro.analyze(data),
+        ]
         return {**state, "analyst_reports": [r.model_dump() for r in reports]}
     except Exception as e:
         return {**state, "error": f"Analysts failed: {e}"}
@@ -67,6 +66,8 @@ def node_run_analysts(state: HedgeFundState) -> HedgeFundState:
 
 def node_debate(state: HedgeFundState) -> HedgeFundState:
     from schemas import AnalystReport
+    if state.get("error") or not state.get("analyst_reports"):
+        return state
     reports = [AnalystReport(**r) for r in state["analyst_reports"]]
     try:
         result = run_debate(state["ticker"], reports, rounds=2)
@@ -77,6 +78,8 @@ def node_debate(state: HedgeFundState) -> HedgeFundState:
 
 def node_trader(state: HedgeFundState) -> HedgeFundState:
     from schemas import MarketData, AnalystReport, DebateResult
+    if not state.get("market_data") or not state.get("analyst_reports") or not state.get("debate_result"):
+        return {**state, "error": "Trader: missing market_data, analyst_reports, or debate_result"}
     data    = MarketData(**state["market_data"])
     reports = [AnalystReport(**r) for r in state["analyst_reports"]]
     debate  = DebateResult(**state["debate_result"])
@@ -89,6 +92,8 @@ def node_trader(state: HedgeFundState) -> HedgeFundState:
 
 def node_risk(state: HedgeFundState) -> HedgeFundState:
     from schemas import MarketData, TradeProposal
+    if state.get("error") or not state.get("trade_proposal") or not state.get("market_data"):
+        return state
     data     = MarketData(**state["market_data"])
     proposal = TradeProposal(**state["trade_proposal"])
     try:
@@ -100,6 +105,8 @@ def node_risk(state: HedgeFundState) -> HedgeFundState:
 
 def node_portfolio_manager(state: HedgeFundState) -> HedgeFundState:
     from schemas import TradeProposal, RiskReview
+    if state.get("error") or not state.get("trade_proposal") or not state.get("risk_review"):
+        return state
     proposal = TradeProposal(**state["trade_proposal"])
     risk     = RiskReview(**state["risk_review"])
     try:
@@ -163,11 +170,6 @@ def run(ticker: str, use_checkpoint: bool = True) -> HedgeFundState:
     """Run the full hedge fund pipeline for a given ticker."""
     from datetime import datetime
 
-    checkpointer = None
-    if use_checkpoint:
-        checkpointer = SqliteSaver.from_conn_string("checkpoints.db")
-
-    graph = build_graph(checkpointer)
     init_state: HedgeFundState = {
         "ticker":          ticker.upper(),
         "market_data":     None,
@@ -181,6 +183,11 @@ def run(ticker: str, use_checkpoint: bool = True) -> HedgeFundState:
         "run_id":          datetime.now().strftime("%Y%m%d_%H%M%S"),
     }
 
-    config = {"configurable": {"thread_id": ticker}} if use_checkpoint else {}
-    result = graph.invoke(init_state, config=config)
-    return result
+    if use_checkpoint:
+        with SqliteSaver.from_conn_string("checkpoints.db") as checkpointer:
+            graph = build_graph(checkpointer)
+            config = {"configurable": {"thread_id": ticker}}
+            return graph.invoke(init_state, config=config)
+    else:
+        graph = build_graph(None)
+        return graph.invoke(init_state)
