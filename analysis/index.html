@@ -164,14 +164,13 @@
   .debate-bull{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
   .debate-bear{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
   .debate-neu{background:var(--bg);color:var(--muted);border-color:var(--border)}
-  /* Analyst 4-column grid (always-visible in header) */
-  .analyst-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-  .ag-cell{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;min-height:72px}
-  .ag-name{font-size:10px;color:var(--muted);font-weight:700;line-height:1.3;word-break:break-word;width:100%}
-  .ag-signal{display:flex;justify-content:center;width:100%}
-  .ag-signal .chip{font-size:10px;white-space:nowrap;width:100%;justify-content:center}
-  .ag-conf{font-size:10px;color:var(--muted);width:100%}
-  .ag-conf-bar{display:block;height:3px;border-radius:2px;background:var(--blue);margin:2px auto 0;opacity:.5;max-width:60px}
+  /* Analyst table-grid: 4 columns × 3 rows, items flow row-by-row */
+  .analyst-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .ag-name{background:var(--bg);font-size:10px;color:var(--muted);font-weight:700;text-align:center;padding:6px 4px 4px;line-height:1.3}
+  .ag-signal{background:var(--card);display:flex;align-items:center;justify-content:center;padding:5px 4px}
+  .ag-signal .chip{font-size:10px;white-space:nowrap}
+  .ag-conf{background:var(--bg);font-size:10px;color:var(--muted);text-align:center;padding:3px 4px 5px}
+  .ag-conf-bar{display:block;height:3px;border-radius:2px;background:var(--blue);margin:2px auto 0;opacity:.5}
   @media(max-width:600px){.analyst-grid{grid-template-columns:repeat(2,1fr)}}
 
   .metric-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
@@ -499,21 +498,28 @@ function renderStock(r) {
   const icon = r.decision==='EXECUTE'?'✅':r.decision==='MONITOR'?'👀':'⛔';
   const bdg  = `badge-${r.decision==='EXECUTE'?'execute':r.decision==='MONITOR'?'monitor':'pass'}`;
 
-  // Analyst 4-column grid (fixed order so columns always align)
+  // Analyst grid: 3 rows × 4 cols so each row aligns perfectly
   const ANALYST_ORDER = ['fundamental','technical','sentiment','macro'];
-  const analystGrid = ANALYST_ORDER.map(key => {
+  const _adata = ANALYST_ORDER.map(key => {
     const s    = (r.analyst_signals||[]).find(x=>(x.type||'').toLowerCase()===key);
     const conf = s?.confidence != null ? (s.confidence*100).toFixed(0) : null;
-    const sigCls   = s ? chipClass(s.signal) : 'chip-hold';
-    const sigLabel = s ? (SIGNAL_LABELS[s.signal]||s.signal) : '–';
-    const label    = ANALYST_LABELS[key];
-    const bar      = conf!=null ? `<span class="ag-conf-bar" style="width:${Math.round(conf*0.6)}px"></span>` : '';
-    return `<div class="ag-cell">
-      <div class="ag-name">${label}</div>
-      <div class="ag-signal"><span class="chip ${sigCls}">${sigLabel}</span></div>
-      <div class="ag-conf">${conf!=null?conf+'% conf':'no data'}${bar}</div>
-    </div>`;
+    return {
+      label:    ANALYST_LABELS[key],
+      sigCls:   s ? chipClass(s.signal) : 'chip-hold',
+      sigLabel: s ? (SIGNAL_LABELS[s.signal]||s.signal) : '–',
+      conf,
+    };
+  });
+  // Row 1: analyst names
+  const _row1 = _adata.map(a=>`<div class="ag-name">${a.label}</div>`).join('');
+  // Row 2: signal chips — all in same grid row so heights match
+  const _row2 = _adata.map(a=>`<div class="ag-signal"><span class="chip ${a.sigCls}">${a.sigLabel}</span></div>`).join('');
+  // Row 3: confidence
+  const _row3 = _adata.map(a=>{
+    const bar = a.conf!=null?`<span class="ag-conf-bar" style="width:${Math.min(48,Math.round(a.conf*0.5))}px"></span>`:'';
+    return `<div class="ag-conf">${a.conf!=null?a.conf+'%':'–'}${bar}</div>`;
   }).join('');
+  const analystGrid = _row1+_row2+_row3;
 
   // Trade parameter section
   const upside   = pct(r.entry_price, r.target_price);
