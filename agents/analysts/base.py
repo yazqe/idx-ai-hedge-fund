@@ -96,7 +96,7 @@ def call_llm(system: str, user: str, schema_class) -> dict:
     import json
     resp = client.messages.create(
         model=MODEL,
-        max_tokens=1024,
+        max_tokens=600,
         system=system + "\n\nRespond ONLY with valid JSON. key_points and risks must be list of plain strings. price_target must be a single number. No markdown.",
         messages=[{"role": "user", "content": user}],
     )

@@ -48,17 +48,15 @@ def node_load_memory(state: HedgeFundState) -> HedgeFundState:
 
 def node_run_analysts(state: HedgeFundState) -> HedgeFundState:
     from schemas import MarketData
+    from concurrent.futures import ThreadPoolExecutor, as_completed
     if state.get("error") or not state.get("market_data"):
         return state
     data = MarketData(**state["market_data"])
     try:
-        # Run sequentially to avoid asyncio event loop conflicts with LangGraph
-        reports = [
-            fundamental.analyze(data),
-            technical.analyze(data),
-            sentiment.analyze(data),
-            macro.analyze(data),
-        ]
+        analysts = [fundamental.analyze, technical.analyze, sentiment.analyze, macro.analyze]
+        with ThreadPoolExecutor(max_workers=4) as ex:
+            futures = [ex.submit(fn, data) for fn in analysts]
+            reports = [f.result() for f in futures]
         return {**state, "analyst_reports": [r.model_dump() for r in reports]}
     except Exception as e:
         return {**state, "error": f"Analysts failed: {e}"}
@@ -70,7 +68,7 @@ def node_debate(state: HedgeFundState) -> HedgeFundState:
         return state
     reports = [AnalystReport(**r) for r in state["analyst_reports"]]
     try:
-        result = run_debate(state["ticker"], reports, rounds=2)
+        result = run_debate(state["ticker"], reports, rounds=1)
         return {**state, "debate_result": result.model_dump()}
     except Exception as e:
         return {**state, "error": f"Debate failed: {e}"}

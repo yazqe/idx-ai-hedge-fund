@@ -2,6 +2,7 @@
 import json, os, sys, time
 from datetime import datetime
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 import pytz
 
@@ -197,16 +198,29 @@ def main(tickers=None):
         for t in tickers:
             sources_map[t] = ["CUSTOM"]
 
+    MAX_WORKERS = 3  # parallel stocks — keep low to avoid Anthropic rate limits
     results = []
-    for i, ticker in enumerate(tickers, 1):
-        print(f"[{i}/{len(tickers)}] Analyzing {ticker} ({', '.join(sources_map.get(ticker, []))})...")
+    completed = 0
+
+    def _analyze(ticker):
+        srcs = sources_map.get(ticker, [])
+        print(f"  → Starting {ticker} ({', '.join(srcs)})...")
         result = run_analysis(ticker)
         if result:
-            result["sources"] = sources_map.get(ticker, [])
-            results.append(result)
-            icon = {"EXECUTE": "✅", "MONITOR": "👀", "PASS": "⛔"}.get(result["decision"], "❓")
-            print(f"  {icon} {result['decision']} — {result['debate_consensus']} | Risk: {result['risk_level']}")
-        time.sleep(2)  # Rate limit
+            result["sources"] = srcs
+        return ticker, result
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
+        futures = {ex.submit(_analyze, t): t for t in tickers}
+        for future in as_completed(futures):
+            completed += 1
+            ticker, result = future.result()
+            if result:
+                results.append(result)
+                icon = {"EXECUTE": "✅", "MONITOR": "👀", "PASS": "⛔"}.get(result["decision"], "❓")
+                print(f"  [{completed}/{len(tickers)}] {icon} {ticker}: {result['decision']} — {result['debate_consensus']} | Risk: {result['risk_level']}")
+            else:
+                print(f"  [{completed}/{len(tickers)}] ❌ {ticker}: failed")
 
     # Sort: EXECUTE first, then MONITOR, then PASS
     order = {"EXECUTE": 0, "MONITOR": 1, "PASS": 2, "ERROR": 3}
