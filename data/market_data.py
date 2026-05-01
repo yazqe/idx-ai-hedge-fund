@@ -22,7 +22,7 @@ def _ds_headers():
 
 
 def _fetch_datasectors_ohlcv(ticker: str, days: int = 365) -> pd.DataFrame:
-    """Fetch OHLCV from datasectors API. Returns normalized DataFrame."""
+    """Fetch OHLCV + foreign flow + frequency from datasectors API."""
     end   = datetime.today()
     start = end - timedelta(days=days)
     url   = (
@@ -35,14 +35,19 @@ def _fetch_datasectors_ohlcv(ticker: str, days: int = 365) -> pd.DataFrame:
 
     raw = r.json()
 
-    # Unwrap common envelope formats
+    # Unwrap: raw['data']['data']['data']['chartbit']
     rows = None
-    if isinstance(raw, list):
-        rows = raw
-    elif isinstance(raw, dict):
-        for key in ("data", "candles", "ohlcv", "chart", "result", "prices", "bars"):
-            if key in raw and isinstance(raw[key], list):
-                rows = raw[key]
+    try:
+        rows = raw["data"]["data"]["data"]["chartbit"]
+    except (KeyError, TypeError):
+        pass
+
+    # Fallback: scan for a list anywhere in response
+    if not rows:
+        for key in ("chartbit", "data", "candles", "ohlcv", "result", "prices", "bars"):
+            candidate = raw.get(key) if isinstance(raw, dict) else None
+            if isinstance(candidate, list) and candidate:
+                rows = candidate
                 break
 
     if not rows:
@@ -50,23 +55,15 @@ def _fetch_datasectors_ohlcv(ticker: str, days: int = 365) -> pd.DataFrame:
 
     df = pd.DataFrame(rows)
 
-    # Normalize column names to standard Open/High/Low/Close/Volume
-    rename = {}
-    for col in df.columns:
-        cl = col.lower()
-        if cl in ("date", "time", "datetime", "timestamp", "t"):
-            rename[col] = "Date"
-        elif cl in ("open", "o"):
-            rename[col] = "Open"
-        elif cl in ("high", "h"):
-            rename[col] = "High"
-        elif cl in ("low", "l"):
-            rename[col] = "Low"
-        elif cl in ("close", "c", "last", "price"):
-            rename[col] = "Close"
-        elif cl in ("volume", "v", "vol"):
-            rename[col] = "Volume"
-    df = df.rename(columns=rename)
+    # Map datasectors field names → standard names
+    rename = {
+        "date": "Date", "open": "Open", "high": "High",
+        "low": "Low", "close": "Close", "volume": "Volume",
+        "foreignbuy": "ForeignBuy", "foreignsell": "ForeignSell",
+        "foreignflow": "ForeignFlow", "frequency": "Frequency",
+        "value": "Value",
+    }
+    df = df.rename(columns={c: rename[c] for c in df.columns if c in rename})
 
     if "Date" in df.columns:
         df["Date"] = pd.to_datetime(df["Date"])
@@ -134,6 +131,9 @@ def fetch_market_data(ticker: str) -> MarketData:
     ds_ok       = False
 
     # ── 1. datasectors for OHLCV ─────────────────────────────────
+    foreign_flow_net = None
+    avg_frequency    = None
+
     if DATASECTORS_KEY and DATASECTORS_KEY not in ("", "nilai_key_disini"):
         try:
             hist = _fetch_datasectors_ohlcv(ticker, days=365)
@@ -150,8 +150,19 @@ def fetch_market_data(ticker: str) -> MarketData:
                     v           = hist["Volume"].dropna()
                     volume      = int(v.iloc[-1]) if len(v) else 0
                     avg_vol_10d = int(v.tail(10).mean()) if len(v) >= 10 else volume
+                # Foreign flow — net 5 hari terakhir
+                if "ForeignFlow" in hist.columns:
+                    ff = hist["ForeignFlow"].dropna()
+                    if len(ff) >= 1:
+                        foreign_flow_net = float(ff.iloc[-1])
+                # Frequency (jumlah transaksi) — avg 10 hari
+                if "Frequency" in hist.columns:
+                    fq = hist["Frequency"].dropna()
+                    if len(fq) >= 1:
+                        avg_frequency = int(fq.tail(10).mean())
             if ds_ok:
-                print(f"  [datasectors] {ticker}: Rp{price:,.0f} {change_pct:+.2f}%")
+                ff_str = f" | FF: {foreign_flow_net/1e9:+.1f}B" if foreign_flow_net else ""
+                print(f"  [datasectors] {ticker}: Rp{price:,.0f} {change_pct:+.2f}%{ff_str}")
         except Exception as e:
             print(f"  [datasectors] {ticker} error: {e} — fallback to yfinance")
 
@@ -203,6 +214,8 @@ def fetch_market_data(ticker: str) -> MarketData:
         sma_50=sma_50,
         sma_200=sma_200,
         sector=sector,
+        foreign_flow_net=foreign_flow_net,
+        avg_frequency=avg_frequency,
     )
 
 

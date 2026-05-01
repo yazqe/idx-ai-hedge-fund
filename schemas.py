@@ -42,13 +42,15 @@ class MarketData(BaseModel):
     revenue_growth:Optional[float] = None
     roe:           Optional[float] = None
     debt_equity:   Optional[float] = None
-    rsi_14:        Optional[float] = None
-    macd:          Optional[float] = None
-    macd_signal:   Optional[float] = None
-    sma_50:        Optional[float] = None
-    sma_200:       Optional[float] = None
-    sector:        Optional[str]   = None
-    fetched_at:    datetime        = Field(default_factory=datetime.now)
+    rsi_14:          Optional[float] = None
+    macd:            Optional[float] = None
+    macd_signal:     Optional[float] = None
+    sma_50:          Optional[float] = None
+    sma_200:         Optional[float] = None
+    sector:          Optional[str]   = None
+    foreign_flow_net:Optional[float] = None  # datasectors: net foreign flow (Rp)
+    avg_frequency:   Optional[int]   = None  # datasectors: avg daily transactions
+    fetched_at:      datetime        = Field(default_factory=datetime.now)
 
 
 # ── Analyst Reports ───────────────────────────────────────────────────────────
