@@ -287,78 +287,49 @@
 <!-- Analyze Tab -->
 <div id="tab-analyze" class="tab-content">
   <div class="analyze-section">
-    <!-- Shown when accessed from GitHub Pages (not local) -->
-    <div id="analyze-remote" style="display:none">
-      <div class="form-card">
-        <div class="form-title">🔍 Analyze IDX Stock</div>
-        <div class="form-sub">Masukkan kode saham IDX untuk analisis AI lengkap</div>
+    <!-- Single panel — connection settings only shown on GitHub Pages -->
+    <div class="form-card">
+      <div class="form-title">🔍 Analyze IDX Stock</div>
+      <div class="form-sub">Masukkan kode saham IDX untuk analisis AI lengkap (Fundamental · Teknikal · Sentimen · Makro · Debat · Risiko)</div>
 
-        <!-- Connection settings -->
-        <div style="margin-bottom:16px;padding:14px;background:#1c2128;border:1px solid var(--border);border-radius:8px">
-          <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">⚙️ Koneksi Server</div>
-          <div style="display:flex;gap:8px;margin-bottom:8px">
-            <input id="api-url-input" type="text" placeholder="https://your-app.up.railway.app"
-              style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:monospace;outline:none">
-            <button onclick="saveApiUrl()" style="padding:8px 14px;background:var(--blue);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Simpan</button>
-          </div>
-          <div style="display:flex;gap:8px;margin-bottom:8px">
-            <input id="pin-input" type="password" placeholder="PIN (jika diperlukan)"
-              style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;outline:none">
-            <button onclick="savePin()" style="padding:8px 14px;background:#21262d;color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Set PIN</button>
-          </div>
-          <div style="font-size:11px;color:var(--muted);display:flex;justify-content:space-between">
-            <span>Railway · ngrok · WiFi lokal</span>
-            <span id="api-url-status" style="font-weight:600"></span>
-          </div>
+      <!-- Connection settings: only shown on GitHub Pages -->
+      <div id="conn-settings" style="display:none;margin-bottom:16px;padding:14px;background:#1c2128;border:1px solid var(--border);border-radius:8px">
+        <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">⚙️ Koneksi Server</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <input id="api-url-input" type="text" placeholder="https://your-app.up.railway.app"
+            style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:monospace;outline:none">
+          <button onclick="saveApiUrl()" style="padding:8px 14px;background:var(--blue);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Simpan</button>
         </div>
-
-        <div class="input-row">
-          <input class="ticker-input" id="ticker-input" type="text" placeholder="contoh: BBCA" maxlength="6"
-                 oninput="this.value=this.value.toUpperCase()"
-                 onkeydown="if(event.key==='Enter')runAnalysis()">
-          <button class="btn-analyze" id="btn-run" onclick="runAnalysis()">▶ Analyze</button>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <input id="pin-input" type="password" placeholder="PIN (jika diperlukan)"
+            style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;outline:none">
+          <button onclick="savePin()" style="padding:8px 14px;background:#21262d;color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Set PIN</button>
         </div>
-        <div class="quick-tickers">
-          <span style="font-size:11px;color:var(--muted);align-self:center">Quick pick:</span>
-          <button class="quick-btn" onclick="setTicker('BBCA')">BBCA</button>
-          <button class="quick-btn" onclick="setTicker('BUMI')">BUMI</button>
-          <button class="quick-btn" onclick="setTicker('GOTO')">GOTO</button>
-          <button class="quick-btn" onclick="setTicker('TLKM')">TLKM</button>
-          <button class="quick-btn" onclick="setTicker('ANTM')">ANTM</button>
-          <button class="quick-btn" onclick="setTicker('BBRI')">BBRI</button>
-          <button class="quick-btn" onclick="setTicker('BMRI')">BMRI</button>
-          <button class="quick-btn" onclick="setTicker('MDKA')">MDKA</button>
+        <div style="font-size:11px;color:var(--muted);display:flex;justify-content:space-between">
+          <span>Railway · ngrok · WiFi lokal</span>
+          <span id="api-url-status" style="font-weight:600"></span>
         </div>
-        <div class="status-box" id="status-box"></div>
-        <div class="result-area" id="result-area"></div>
       </div>
-    </div>
 
-    <!-- Shown when accessed from local server -->
-    <div id="analyze-local" style="display:none">
-      <div class="form-card">
-        <div class="form-title">🔍 Analyze IDX Stock</div>
-        <div class="form-sub">Masukkan kode saham IDX untuk analisis AI lengkap (Fundamental · Technical · Sentiment · Macro · Debate · Risk)</div>
-        <div class="input-row">
-          <input class="ticker-input" id="ticker-input" type="text" placeholder="contoh: BBCA" maxlength="6"
-                 oninput="this.value=this.value.toUpperCase()"
-                 onkeydown="if(event.key==='Enter')runAnalysis()">
-          <button class="btn-analyze" id="btn-run" onclick="runAnalysis()">▶ Analyze</button>
-        </div>
-        <div class="quick-tickers">
-          <span style="font-size:11px;color:var(--muted);align-self:center">Quick pick:</span>
-          <button class="quick-btn" onclick="setTicker('BBCA')">BBCA</button>
-          <button class="quick-btn" onclick="setTicker('BUMI')">BUMI</button>
-          <button class="quick-btn" onclick="setTicker('GOTO')">GOTO</button>
-          <button class="quick-btn" onclick="setTicker('TLKM')">TLKM</button>
-          <button class="quick-btn" onclick="setTicker('ANTM')">ANTM</button>
-          <button class="quick-btn" onclick="setTicker('BBRI')">BBRI</button>
-          <button class="quick-btn" onclick="setTicker('BMRI')">BMRI</button>
-          <button class="quick-btn" onclick="setTicker('MDKA')">MDKA</button>
-        </div>
-        <div class="status-box" id="status-box"></div>
-        <div class="result-area" id="result-area"></div>
+      <div class="input-row">
+        <input class="ticker-input" id="ticker-input" type="text" placeholder="contoh: BBCA" maxlength="6"
+               oninput="this.value=this.value.toUpperCase()"
+               onkeydown="if(event.key==='Enter')runAnalysis()">
+        <button class="btn-analyze" id="btn-run" onclick="runAnalysis()">▶ Analyze</button>
       </div>
+      <div class="quick-tickers">
+        <span style="font-size:11px;color:var(--muted);align-self:center">Quick pick:</span>
+        <button class="quick-btn" onclick="setTicker('BBCA')">BBCA</button>
+        <button class="quick-btn" onclick="setTicker('BUMI')">BUMI</button>
+        <button class="quick-btn" onclick="setTicker('GOTO')">GOTO</button>
+        <button class="quick-btn" onclick="setTicker('TLKM')">TLKM</button>
+        <button class="quick-btn" onclick="setTicker('ANTM')">ANTM</button>
+        <button class="quick-btn" onclick="setTicker('BBRI')">BBRI</button>
+        <button class="quick-btn" onclick="setTicker('BMRI')">BMRI</button>
+        <button class="quick-btn" onclick="setTicker('MDKA')">MDKA</button>
+      </div>
+      <div class="status-box" id="status-box"></div>
+      <div class="result-area" id="result-area"></div>
     </div>
   </div>
 </div>
@@ -807,10 +778,11 @@ setInterval(load, 15*60*1000);
 // Apply saved language on load
 switchLang(LANG);
 
-// ── Detect local vs remote ────────────────────────────────────
-// Local = 127.0.0.1, OR any non-GitHub-Pages host (Railway, Render, etc.)
-var IS_LOCAL = window.location.hostname !== 'yazqe.github.io';
-document.getElementById(IS_LOCAL ? 'analyze-local' : 'analyze-remote').style.display = 'block';
+// ── Show connection settings only on GitHub Pages ─────────────
+var IS_GITHUB_PAGES = window.location.hostname === 'yazqe.github.io';
+if (IS_GITHUB_PAGES) {
+  document.getElementById('conn-settings').style.display = 'block';
+}
 
 // Load saved API URL into input
 (function(){
