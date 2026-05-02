@@ -933,19 +933,26 @@ async function pollResult(ticker) {
     if (d.status === 'done') {
       clearInterval(_pollTimer);
       setProgress(100, 'Selesai ✓');
-      setStatus('done', `✅ Analisis ${ticker} selesai!`);
-      document.getElementById('result-area').innerHTML = renderSingleResult(d.result);
-      document.getElementById('btn-run').disabled = false;
       var dot = document.getElementById('progress-dot');
-      if (dot) dot.style.animation = 'none', dot.style.background = 'var(--green)';
+      if (dot) { dot.style.animation = 'none'; dot.style.background = 'var(--green)'; }
+      try {
+        document.getElementById('result-area').innerHTML = renderSingleResult(d.result);
+        setStatus('done', `✅ Analisis ${ticker} selesai!`);
+      } catch(renderErr) {
+        setStatus('error', `⚠️ Analisis selesai tapi gagal ditampilkan: ${renderErr.message}`);
+        console.error('Render error:', renderErr, d.result);
+      }
+      document.getElementById('btn-run').disabled = false;
       setTimeout(() => { document.getElementById('progress-wrap').style.display='none'; }, 2500);
     } else if (d.status === 'error') {
       clearInterval(_pollTimer);
       setProgress(0, '');
-      setStatus('error', `❌ Analisis ${ticker} gagal.`);
+      setStatus('error', `❌ Analisis ${ticker} gagal di server.`);
       document.getElementById('btn-run').disabled = false;
     }
-  } catch(e) {}
+  } catch(e) {
+    console.error('Poll error:', e);
+  }
 }
 
 async function runAnalysis() {
@@ -972,7 +979,17 @@ async function runAnalysis() {
   setProgress(5, 'Memulai analisis...');
   await apiFetch(`${LOCAL_API}/api/analyze/${ticker}`, {method:'POST'});
   clearInterval(_pollTimer);
-  _pollTimer = setInterval(()=>pollResult(ticker), 5000);
+  _pollTimer = setInterval(()=>{
+    var elapsed = (Date.now() - _analysisStart) / 1000;
+    if (elapsed > 360) { // 6 minutes timeout
+      clearInterval(_pollTimer);
+      setProgress(0, '');
+      setStatus('error', '⏱️ Analisis melebihi batas waktu. Coba lagi.');
+      document.getElementById('btn-run').disabled = false;
+      return;
+    }
+    pollResult(ticker);
+  }, 5000);
 }
 </script>
 </div><!-- end tab-batch -->
