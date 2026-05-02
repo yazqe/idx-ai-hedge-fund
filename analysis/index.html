@@ -808,7 +808,8 @@ setInterval(load, 15*60*1000);
 switchLang(LANG);
 
 // ── Detect local vs remote ────────────────────────────────────
-var IS_LOCAL = window.location.hostname === '127.0.0.1';
+// Local = 127.0.0.1, OR any non-GitHub-Pages host (Railway, Render, etc.)
+var IS_LOCAL = window.location.hostname !== 'yazqe.github.io';
 document.getElementById(IS_LOCAL ? 'analyze-local' : 'analyze-remote').style.display = 'block';
 
 // Load saved API URL into input
@@ -873,7 +874,9 @@ function switchTab(name, el) {
 // ── Analyze Ticker ─────────────────────────────────────────────
 function getApiUrl() {
   if (window.location.hostname === '127.0.0.1') return 'https://127.0.0.1:8765';
-  return localStorage.getItem('idx_api_url') || 'https://127.0.0.1:8765';
+  // If served FROM Railway/cloud server, API is on same origin
+  if (window.location.hostname !== 'yazqe.github.io') return window.location.origin;
+  return localStorage.getItem('idx_api_url') || '';
 }
 var LOCAL_API = getApiUrl();
 let _pollTimer = null;
@@ -923,16 +926,7 @@ async function runAnalysis() {
     const r = await apiFetch(`${LOCAL_API}/api/health`, {signal: AbortSignal.timeout(3000)});
     if (!r.ok) throw new Error();
   } catch(e) {
-    // Safari blocks HTTP from HTTPS — redirect user to local version
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    if (isSafari) {
-      setStatus('error', `Buka halaman ini di browser lokal untuk menggunakan fitur Analyze: <br>
-        <a href="http://127.0.0.1:8765/" style="color:#58a6ff;font-weight:700;display:inline-block;margin-top:6px">
-          → Buka http://127.0.0.1:8765/
-        </a>`);
-    } else {
-      setStatus('error', `❌ Analisis tidak tersedia saat ini. Silakan coba beberapa saat lagi.`);
-    }
+    setStatus('error', `❌ Tidak dapat terhubung ke server analisis. Pastikan URL server sudah benar.`);
     document.getElementById('btn-run').disabled = false;
     return;
   }
