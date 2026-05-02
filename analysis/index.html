@@ -924,11 +924,11 @@ async function pollResult(ticker) {
     const r = await apiFetch(`${LOCAL_API}/api/result/${ticker}`);
     const d = await r.json();
 
-    // Update progress — use server value, fallback to time-based estimate
-    if (d.progress) {
-      var prog = estimateProgress(d.progress.pct);
-      setProgress(prog.pct, prog.step || d.progress.step);
-    }
+    // Always update progress — server value if available, else time-based
+    var serverPct  = (d.progress && d.progress.pct)  || 0;
+    var serverStep = (d.progress && d.progress.step) || null;
+    var prog = estimateProgress(serverPct);
+    setProgress(prog.pct, prog.step || serverStep || 'Menganalisis...');
 
     if (d.status === 'done') {
       clearInterval(_pollTimer);
