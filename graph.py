@@ -57,8 +57,10 @@ def node_run_analysts(state: HedgeFundState) -> HedgeFundState:
         return state
     data = MarketData(**state["market_data"])
     try:
+        import os
+        workers = int(os.environ.get("ANALYST_WORKERS", "4"))
         analysts = [fundamental.analyze, technical.analyze, sentiment.analyze, macro.analyze]
-        with ThreadPoolExecutor(max_workers=4) as ex:
+        with ThreadPoolExecutor(max_workers=workers) as ex:
             futures = [ex.submit(fn, data) for fn in analysts]
             reports = []
             for f in futures:

@@ -1065,7 +1065,7 @@ async function runAnalysis() {
   clearInterval(_pollTimer);
   _pollTimer = setInterval(()=>{
     var elapsed = (Date.now() - _analysisStart) / 1000;
-    if (elapsed > 480) { // 8 minutes timeout
+    if (elapsed > 900) { // 15 minutes timeout
       clearInterval(_pollTimer);
       setProgress(0, '');
       setStatus('error', '⏱️ Analisis melebihi batas waktu. Coba lagi.');
