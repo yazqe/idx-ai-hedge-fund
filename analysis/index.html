@@ -884,7 +884,13 @@ function apiFetch(url, opts) {
   var pin = getSavedPin();
   opts = opts || {};
   opts.headers = Object.assign({}, opts.headers || {}, pin ? {'X-API-Pin': pin} : {});
-  return fetch(url, opts);
+  return fetch(url, opts).then(function(r) {
+    if (r.status === 401 && !document.getElementById('pin-overlay')) {
+      localStorage.removeItem('idx_api_pin'); // clear wrong/missing PIN
+      showPinPrompt();
+    }
+    return r;
+  });
 }
 
 function savePin() {
