@@ -205,6 +205,10 @@
   .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),#58cfff);border-radius:6px;transition:width .6s ease}
   .progress-pct-row{text-align:right;font-size:10px;color:var(--muted);margin-top:3px}
   .result-area{margin-top:16px}
+  /* PIN modal */
+  #pin-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center}
+  #pin-modal.show{display:flex}
+  #pin-modal-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:32px;width:300px;text-align:center}
   .local-only{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--gold);margin-top:12px}
   .quick-tickers{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
   .quick-btn{padding:5px 12px;background:#21262d;border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text);transition:background .15s}
@@ -212,6 +216,23 @@
 </style>
 </head>
 <body>
+
+<!-- PIN Modal (always in DOM, shown via CSS class) -->
+<div id="pin-modal">
+  <div id="pin-modal-box">
+    <div style="font-size:32px;margin-bottom:12px">🔐</div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text)">PIN Diperlukan</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Masukkan PIN untuk mengakses fitur analisis</div>
+    <input id="pin-modal-input" type="password" placeholder="Masukkan PIN..."
+      style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:18px;text-align:center;letter-spacing:6px;outline:none;margin-bottom:10px"
+      onkeydown="if(event.key==='Enter')submitPin()">
+    <button onclick="submitPin()"
+      style="width:100%;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
+      Masuk
+    </button>
+    <div id="pin-modal-err" style="color:var(--red);font-size:12px;margin-top:8px;display:none">PIN salah, coba lagi.</div>
+  </div>
+</div>
 
 <!-- Header -->
 <header>
@@ -816,31 +837,24 @@ if (IS_GITHUB_PAGES) {
 })();
 
 function showPinPrompt() {
-  var overlay = document.createElement('div');
-  overlay.id = 'pin-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999';
-  overlay.innerHTML = `
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px 32px;width:320px;text-align:center">
-      <div style="font-size:24px;margin-bottom:12px">🔐</div>
-      <div style="font-size:16px;font-weight:700;margin-bottom:6px">PIN Diperlukan</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Masukkan PIN untuk mengakses fitur analisis</div>
-      <input id="pin-prompt-input" type="password" placeholder="Masukkan PIN..."
-        style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;text-align:center;letter-spacing:4px;outline:none;margin-bottom:12px"
-        onkeydown="if(event.key==='Enter')submitPinPrompt()">
-      <button onclick="submitPinPrompt()"
-        style="width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
-        Masuk
-      </button>
-      <div id="pin-prompt-error" style="color:var(--red);font-size:12px;margin-top:8px;display:none">PIN salah, coba lagi.</div>
-    </div>`;
-  document.body.appendChild(overlay);
-  setTimeout(function(){ document.getElementById('pin-prompt-input').focus(); }, 100);
+  var modal = document.getElementById('pin-modal');
+  if (modal) {
+    modal.classList.add('show');
+    setTimeout(function(){ var i=document.getElementById('pin-modal-input'); if(i)i.focus(); }, 100);
+  }
 }
 
-function submitPinPrompt() {
-  var pin = (document.getElementById('pin-prompt-input').value || '').trim();
+function hidePinPrompt() {
+  var modal = document.getElementById('pin-modal');
+  if (modal) modal.classList.remove('show');
+  var err = document.getElementById('pin-modal-err');
+  if (err) err.style.display = 'none';
+}
+
+function submitPin() {
+  var pin = (document.getElementById('pin-modal-input').value || '').trim();
   if (!pin) return;
-  apiFetch(LOCAL_API + '/api/verify-pin', {
+  fetch(LOCAL_API + '/api/verify-pin', {
     method: 'POST',
     headers: {'Content-Type':'application/json', 'X-API-Pin': pin},
     body: JSON.stringify({pin: pin})
@@ -849,19 +863,17 @@ function submitPinPrompt() {
   .then(function(d) {
     if (d.valid) {
       localStorage.setItem('idx_api_pin', pin);
-      var ov = document.getElementById('pin-overlay');
-      if (ov) ov.remove();
-      // Update pin input in settings if visible
       var pi = document.getElementById('pin-input');
       if (pi) pi.value = pin;
+      hidePinPrompt();
     } else {
-      var err = document.getElementById('pin-prompt-error');
+      var err = document.getElementById('pin-modal-err');
       if (err) err.style.display = 'block';
-      document.getElementById('pin-prompt-input').value = '';
-      document.getElementById('pin-prompt-input').focus();
+      var inp = document.getElementById('pin-modal-input');
+      if (inp) { inp.value = ''; inp.focus(); }
     }
   })
-  .catch(function(){ });
+  .catch(function(e){ console.error('PIN verify error:', e); });
 }
 
 // Load saved API URL into input
@@ -885,8 +897,8 @@ function apiFetch(url, opts) {
   opts = opts || {};
   opts.headers = Object.assign({}, opts.headers || {}, pin ? {'X-API-Pin': pin} : {});
   return fetch(url, opts).then(function(r) {
-    if (r.status === 401 && !document.getElementById('pin-overlay')) {
-      localStorage.removeItem('idx_api_pin'); // clear wrong/missing PIN
+    if (r.status === 401) {
+      localStorage.removeItem('idx_api_pin');
       showPinPrompt();
     }
     return r;
