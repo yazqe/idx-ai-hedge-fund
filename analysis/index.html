@@ -293,22 +293,22 @@
         <div class="form-title">🔍 Analyze IDX Stock</div>
         <div class="form-sub">Masukkan kode saham IDX untuk analisis AI lengkap</div>
 
-        <!-- Custom API URL input -->
+        <!-- Connection settings -->
         <div style="margin-bottom:16px;padding:14px;background:#1c2128;border:1px solid var(--border);border-radius:8px">
-          <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">
-            🔗 API Server URL
+          <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">⚙️ Koneksi Server</div>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <input id="api-url-input" type="text" placeholder="https://your-app.up.railway.app"
+              style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:monospace;outline:none">
+            <button onclick="saveApiUrl()" style="padding:8px 14px;background:var(--blue);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Simpan</button>
           </div>
-          <div style="display:flex;gap:8px">
-            <input id="api-url-input" type="text" placeholder="https://your-server.railway.app"
-              style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:monospace;outline:none"
-              value="">
-            <button onclick="saveApiUrl()" style="padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Simpan</button>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <input id="pin-input" type="password" placeholder="PIN (jika diperlukan)"
+              style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;outline:none">
+            <button onclick="savePin()" style="padding:8px 14px;background:#21262d;color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Set PIN</button>
           </div>
-          <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-            💡 Opsi:
-            <a href="https://127.0.0.1:8765/" target="_blank" style="color:var(--blue)">WiFi sama</a> ·
-            <span style="color:var(--muted)">ngrok · Railway · Render</span>
-            <span id="api-url-status" style="float:right;font-weight:600"></span>
+          <div style="font-size:11px;color:var(--muted);display:flex;justify-content:space-between">
+            <span>Railway · ngrok · WiFi lokal</span>
+            <span id="api-url-status" style="font-weight:600"></span>
           </div>
         </div>
 
@@ -825,6 +825,22 @@ function showApiStatus(url) {
   el.style.color = 'var(--green)';
 }
 
+function getSavedPin() { return localStorage.getItem('idx_api_pin') || ''; }
+
+function apiFetch(url, opts) {
+  var pin = getSavedPin();
+  opts = opts || {};
+  opts.headers = Object.assign({}, opts.headers || {}, pin ? {'X-API-Pin': pin} : {});
+  return fetch(url, opts);
+}
+
+function savePin() {
+  var pin = (document.getElementById('pin-input').value || '').trim();
+  localStorage.setItem('idx_api_pin', pin);
+  document.getElementById('api-url-status').textContent = pin ? '🔐 PIN disimpan' : '🔓 Tanpa PIN';
+  document.getElementById('api-url-status').style.color = 'var(--green)';
+}
+
 function saveApiUrl() {
   var url = (document.getElementById('api-url-input').value || '').trim().replace(/\/+$/,'');
   if (!url) return;
@@ -832,9 +848,12 @@ function saveApiUrl() {
   LOCAL_API = url;
   showApiStatus(url);
   setStatus('running', '🔗 Menghubungkan ke ' + url + '...');
-  fetch(url + '/api/health', {signal: AbortSignal.timeout(5000)})
+  apiFetch(url + '/api/health', {signal: AbortSignal.timeout(5000)})
     .then(r => r.json())
-    .then(d => setStatus('done', '✅ Terhubung! Server: ' + (d.time||'ok')))
+    .then(d => {
+      var pinMsg = d.pin_required ? ' · PIN diperlukan' : ' · Tanpa PIN';
+      setStatus('done', '✅ Terhubung! ' + (d.time||'ok') + pinMsg);
+    })
     .catch(() => setStatus('error', '❌ Tidak bisa terhubung ke ' + url));
 }
 
@@ -877,7 +896,7 @@ function renderSingleResult(r) {
 
 async function pollResult(ticker) {
   try {
-    const r = await fetch(`${LOCAL_API}/api/result/${ticker}`);
+    const r = await apiFetch(`${LOCAL_API}/api/result/${ticker}`);
     const d = await r.json();
     if (d.status === 'done') {
       clearInterval(_pollTimer);
@@ -901,7 +920,7 @@ async function runAnalysis() {
   setStatus('running', `⏳ Menghubungi server...`);
 
   try {
-    const r = await fetch(`${LOCAL_API}/api/health`, {signal: AbortSignal.timeout(3000)});
+    const r = await apiFetch(`${LOCAL_API}/api/health`, {signal: AbortSignal.timeout(3000)});
     if (!r.ok) throw new Error();
   } catch(e) {
     // Safari blocks HTTP from HTTPS — redirect user to local version
@@ -919,7 +938,7 @@ async function runAnalysis() {
   }
 
   setStatus('running', `🤖 Menganalisis <strong>${ticker}</strong>… (estimasi 2–4 menit)`);
-  await fetch(`${LOCAL_API}/api/analyze/${ticker}`, {method:'POST'});
+  await apiFetch(`${LOCAL_API}/api/analyze/${ticker}`, {method:'POST'});
   clearInterval(_pollTimer);
   _pollTimer = setInterval(()=>pollResult(ticker), 5000);
 }

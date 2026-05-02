@@ -1,8 +1,8 @@
-"""Local API server — real-time single-ticker analysis via browser."""
-import json, threading
+"""Local/Cloud API server — real-time single-ticker analysis."""
+import json, os, threading
 from datetime import datetime
 from pathlib import Path
-from flask import Flask, jsonify, request, send_file, redirect
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 import pytz
 
@@ -11,11 +11,23 @@ ROOT = Path(__file__).parent
 app  = Flask(__name__, static_folder=str(ROOT / "analysis"), static_url_path="/static")
 CORS(app)
 
-_running: dict = {}   # ticker → "running" | "done" | "error"
-_results: dict = {}   # ticker → result dict
-_started: dict = {}   # ticker → timestamp when analysis started
+# ── PIN protection (set API_PIN env var to enable) ─────────────
+API_PIN = os.environ.get("API_PIN", "").strip()
 
-ANALYSIS_TIMEOUT = 300  # 5 minutes max
+def _check_pin():
+    """Return True if PIN is valid or not required."""
+    if not API_PIN:
+        return True
+    return request.headers.get("X-API-Pin", "") == API_PIN
+
+def _pin_error():
+    return jsonify({"error": "PIN required", "code": 401}), 401
+
+# ── In-memory state ────────────────────────────────────────────
+_running: dict = {}
+_results: dict = {}
+_started: dict = {}
+ANALYSIS_TIMEOUT = 300
 
 
 def _do_analysis(ticker: str):
@@ -31,25 +43,48 @@ def _do_analysis(ticker: str):
         else:
             _running[ticker] = "error"
     except Exception as e:
-        print(f"  ❌ Analysis error for {ticker}: {e}")
+        print(f"  ❌ {ticker}: {e}")
         _running[ticker] = "error"
 
+
+# ── Routes ─────────────────────────────────────────────────────
+
+@app.route("/api/health")
+def health():
+    return jsonify({"ok": True, "time": datetime.now(WIB).strftime("%H:%M WIB"),
+                    "pin_required": bool(API_PIN)})
+
+@app.route("/api/verify-pin", methods=["POST"])
+def verify_pin():
+    if not API_PIN:
+        return jsonify({"valid": True, "pin_required": False})
+    pin = request.json.get("pin", "") if request.is_json else ""
+    return jsonify({"valid": pin == API_PIN, "pin_required": True})
 
 @app.route("/api/analyze/<ticker>", methods=["POST"])
 def analyze(ticker: str):
     import time
+    if not _check_pin():
+        return _pin_error()
     ticker = ticker.upper()
-    # Auto-reset if stuck beyond timeout
     if _running.get(ticker) == "running":
         elapsed = time.time() - _started.get(ticker, 0)
         if elapsed < ANALYSIS_TIMEOUT:
             return jsonify({"status": "running", "ticker": ticker})
-        else:
-            _running[ticker] = "error"  # force reset
+        _running[ticker] = "error"
     t = threading.Thread(target=_do_analysis, args=(ticker,), daemon=True)
     t.start()
     return jsonify({"status": "started", "ticker": ticker})
 
+@app.route("/api/result/<ticker>")
+def result(ticker: str):
+    if not _check_pin():
+        return _pin_error()
+    ticker = ticker.upper()
+    status = _running.get(ticker, "idle")
+    if status == "done" and ticker in _results:
+        return jsonify({"status": "done", "result": _results[ticker]})
+    return jsonify({"status": status, "ticker": ticker})
 
 @app.route("/api/reset/<ticker>", methods=["POST"])
 def reset(ticker: str):
@@ -59,42 +94,34 @@ def reset(ticker: str):
     _started.pop(ticker, None)
     return jsonify({"status": "reset", "ticker": ticker})
 
-
-@app.route("/api/result/<ticker>")
-def result(ticker: str):
-    ticker = ticker.upper()
-    status = _running.get(ticker, "idle")
-    if status == "done" and ticker in _results:
-        return jsonify({"status": "done", "result": _results[ticker]})
-    return jsonify({"status": status, "ticker": ticker})
-
-
-@app.route("/api/health")
-def health():
-    return jsonify({"ok": True, "time": datetime.now(WIB).strftime("%H:%M WIB")})
-
-
 @app.route("/")
 def index():
-    """Serve dashboard locally — no mixed-content issues."""
     return send_file(ROOT / "analysis" / "index.html")
-
-@app.route("/favicon.ico")
-def favicon():
-    return "", 204
 
 @app.route("/data/latest.json")
 def latest_json():
     return send_file(ROOT / "analysis" / "data" / "latest.json")
 
+@app.route("/favicon.ico")
+def favicon():
+    return "", 204
+
 
 if __name__ == "__main__":
-    import os
-    cert = Path(__file__).parent / "certs" / "cert.pem"
-    key  = Path(__file__).parent / "certs" / "key.pem"
-    ssl_ctx = (str(cert), str(key)) if cert.exists() and key.exists() else None
-    proto = "https" if ssl_ctx else "http"
-    print("🌐 IDX AI Hedge Fund Local API")
-    print(f"   {proto}://127.0.0.1:8765/")
-    print(f"   {proto}://127.0.0.1:8765/api/health\n")
-    app.run(host="0.0.0.0", port=8765, debug=False, ssl_context=ssl_ctx)
+    # Local: use HTTPS cert if available; Railway: plain HTTP (TLS handled by proxy)
+    IS_RAILWAY = bool(os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("PORT"))
+    port = int(os.environ.get("PORT", 8765))
+
+    if IS_RAILWAY:
+        ssl_ctx = None
+        proto   = "http"
+    else:
+        cert = ROOT / "certs" / "cert.pem"
+        key  = ROOT / "certs" / "key.pem"
+        ssl_ctx = (str(cert), str(key)) if cert.exists() and key.exists() else None
+        proto   = "https" if ssl_ctx else "http"
+
+    pin_status = f"PIN: {'enabled ✅' if API_PIN else 'disabled (set API_PIN to enable)'}"
+    print(f"🌐 IDX AI Hedge Fund API  |  {pin_status}")
+    print(f"   {proto}://{'0.0.0.0' if IS_RAILWAY else '127.0.0.1'}:{port}/\n")
+    app.run(host="0.0.0.0", port=port, debug=False, ssl_context=ssl_ctx)
