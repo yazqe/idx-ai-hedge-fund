@@ -196,6 +196,10 @@
   .status-box.running{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue);display:block}
   .status-box.error{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);display:block}
   .status-box.done{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);display:block}
+  .progress-wrap{margin-top:10px;display:none}
+  .progress-track{background:#21262d;border-radius:6px;height:8px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),#58cfff);border-radius:6px;transition:width .6s ease}
+  .progress-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px}
   .result-area{margin-top:16px}
   .local-only{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--gold);margin-top:12px}
   .quick-tickers{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
@@ -329,6 +333,15 @@
         <button class="quick-btn" onclick="setTicker('MDKA')">MDKA</button>
       </div>
       <div class="status-box" id="status-box"></div>
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-label">
+          <span id="progress-step">Memulai...</span>
+          <span id="progress-pct">0%</span>
+        </div>
+      </div>
       <div class="result-area" id="result-area"></div>
     </div>
   </div>
@@ -869,18 +882,37 @@ function renderSingleResult(r) {
   return `<div style="margin-top:16px">${renderStock(r)}</div>`;
 }
 
+function setProgress(pct, step) {
+  var wrap = document.getElementById('progress-wrap');
+  var fill = document.getElementById('progress-fill');
+  var stepEl = document.getElementById('progress-step');
+  var pctEl  = document.getElementById('progress-pct');
+  if (!wrap) return;
+  wrap.style.display = pct > 0 ? 'block' : 'none';
+  fill.style.width = pct + '%';
+  if (stepEl) stepEl.textContent = step || '';
+  if (pctEl)  pctEl.textContent  = pct + '%';
+}
+
 async function pollResult(ticker) {
   try {
     const r = await apiFetch(`${LOCAL_API}/api/result/${ticker}`);
     const d = await r.json();
+
+    // Update progress bar from server
+    if (d.progress) setProgress(d.progress.pct, d.progress.step);
+
     if (d.status === 'done') {
       clearInterval(_pollTimer);
+      setProgress(100, 'Selesai ✓');
       setStatus('done', `✅ Analisis ${ticker} selesai!`);
       document.getElementById('result-area').innerHTML = renderSingleResult(d.result);
       document.getElementById('btn-run').disabled = false;
+      setTimeout(() => { document.getElementById('progress-wrap').style.display='none'; }, 2000);
     } else if (d.status === 'error') {
       clearInterval(_pollTimer);
-      setStatus('error', `❌ Analisis ${ticker} gagal. Cek terminal untuk error.`);
+      setProgress(0, '');
+      setStatus('error', `❌ Analisis ${ticker} gagal.`);
       document.getElementById('btn-run').disabled = false;
     }
   } catch(e) {}
@@ -892,6 +924,8 @@ async function runAnalysis() {
 
   document.getElementById('btn-run').disabled = true;
   document.getElementById('result-area').innerHTML = '';
+  setProgress(0, '');
+  document.getElementById('progress-wrap').style.display = 'none';
   setStatus('running', `⏳ Menghubungi server...`);
 
   try {
@@ -903,7 +937,8 @@ async function runAnalysis() {
     return;
   }
 
-  setStatus('running', `🤖 Menganalisis <strong>${ticker}</strong>… (estimasi 2–4 menit)`);
+  setStatus('running', `🤖 Menganalisis <strong>${ticker}</strong>…`);
+  setProgress(5, 'Memulai analisis...');
   await apiFetch(`${LOCAL_API}/api/analyze/${ticker}`, {method:'POST'});
   clearInterval(_pollTimer);
   _pollTimer = setInterval(()=>pollResult(ticker), 5000);

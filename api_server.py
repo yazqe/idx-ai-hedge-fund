@@ -5,6 +5,7 @@ from pathlib import Path
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 import pytz
+import progress_tracker as PT
 
 WIB  = pytz.timezone('Asia/Jakarta')
 ROOT = Path(__file__).parent
@@ -35,11 +36,13 @@ def _do_analysis(ticker: str):
     from batch_analysis import run_analysis
     _running[ticker] = "running"
     _started[ticker] = time.time()
+    PT.update(ticker, "start")
     try:
         result = run_analysis(ticker)
         if result:
             _results[ticker] = result
             _running[ticker] = "done"
+            PT.update(ticker, "done")
         else:
             _running[ticker] = "error"
     except Exception as e:
@@ -82,9 +85,10 @@ def result(ticker: str):
         return _pin_error()
     ticker = ticker.upper()
     status = _running.get(ticker, "idle")
+    progress = PT.get(ticker)
     if status == "done" and ticker in _results:
-        return jsonify({"status": "done", "result": _results[ticker]})
-    return jsonify({"status": status, "ticker": ticker})
+        return jsonify({"status": "done", "result": _results[ticker], "progress": progress})
+    return jsonify({"status": status, "ticker": ticker, "progress": progress})
 
 @app.route("/api/reset/<ticker>", methods=["POST"])
 def reset(ticker: str):

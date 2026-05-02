@@ -14,6 +14,7 @@ from agents.trader import propose
 from agents.risk_manager import review
 from agents.portfolio_manager import decide
 from memory.logger import log_run, load_recent_memory, reflect
+import progress_tracker as PT
 
 
 # ── LangGraph needs a plain TypedDict for state ───────────────────────────────
@@ -33,6 +34,7 @@ class HedgeFundState(TypedDict):
 # ── Node functions ─────────────────────────────────────────────────────────────
 
 def node_fetch_data(state: HedgeFundState) -> HedgeFundState:
+    PT.update(state["ticker"], "fetch_data")
     try:
         data = fetch_market_data(state["ticker"])
         return {**state, "market_data": data.model_dump()}
@@ -41,6 +43,7 @@ def node_fetch_data(state: HedgeFundState) -> HedgeFundState:
 
 
 def node_load_memory(state: HedgeFundState) -> HedgeFundState:
+    PT.update(state["ticker"], "memory")
     raw = load_recent_memory(state["ticker"])
     reflection = reflect(raw, state["ticker"]) if raw else ""
     return {**state, "memory_context": reflection}
@@ -49,6 +52,7 @@ def node_load_memory(state: HedgeFundState) -> HedgeFundState:
 def node_run_analysts(state: HedgeFundState) -> HedgeFundState:
     from schemas import MarketData
     from concurrent.futures import ThreadPoolExecutor, as_completed
+    PT.update(state["ticker"], "analysts")
     if state.get("error") or not state.get("market_data"):
         return state
     data = MarketData(**state["market_data"])
@@ -62,6 +66,7 @@ def node_run_analysts(state: HedgeFundState) -> HedgeFundState:
                     reports.append(f.result())
                 except Exception as e:
                     print(f"  ⚠️ Analyst error (skipped): {e}")
+        PT.update(state["ticker"], "analysts_done")
         return {**state, "analyst_reports": [r.model_dump() for r in reports]}
     except Exception as e:
         return {**state, "error": f"Analysts failed: {e}"}
@@ -69,11 +74,13 @@ def node_run_analysts(state: HedgeFundState) -> HedgeFundState:
 
 def node_debate(state: HedgeFundState) -> HedgeFundState:
     from schemas import AnalystReport
+    PT.update(state["ticker"], "debate")
     if state.get("error") or not state.get("analyst_reports"):
         return state
     reports = [AnalystReport(**r) for r in state["analyst_reports"]]
     try:
         result = run_debate(state["ticker"], reports, rounds=1)
+        PT.update(state["ticker"], "debate_done")
         return {**state, "debate_result": result.model_dump()}
     except Exception as e:
         return {**state, "error": f"Debate failed: {e}"}
@@ -81,6 +88,7 @@ def node_debate(state: HedgeFundState) -> HedgeFundState:
 
 def node_trader(state: HedgeFundState) -> HedgeFundState:
     from schemas import MarketData, AnalystReport, DebateResult
+    PT.update(state["ticker"], "trader")
     if not state.get("market_data") or not state.get("analyst_reports") or not state.get("debate_result"):
         return {**state, "error": "Trader: missing market_data, analyst_reports, or debate_result"}
     data    = MarketData(**state["market_data"])
@@ -88,6 +96,7 @@ def node_trader(state: HedgeFundState) -> HedgeFundState:
     debate  = DebateResult(**state["debate_result"])
     try:
         proposal = propose(data, reports, debate)
+        PT.update(state["ticker"], "trader_done")
         return {**state, "trade_proposal": proposal.model_dump()}
     except Exception as e:
         return {**state, "error": f"Trader failed: {e}"}
@@ -95,12 +104,14 @@ def node_trader(state: HedgeFundState) -> HedgeFundState:
 
 def node_risk(state: HedgeFundState) -> HedgeFundState:
     from schemas import MarketData, TradeProposal
+    PT.update(state["ticker"], "risk")
     if state.get("error") or not state.get("trade_proposal") or not state.get("market_data"):
         return state
     data     = MarketData(**state["market_data"])
     proposal = TradeProposal(**state["trade_proposal"])
     try:
         risk = review(proposal, data)
+        PT.update(state["ticker"], "risk_done")
         return {**state, "risk_review": risk.model_dump()}
     except Exception as e:
         return {**state, "error": f"Risk failed: {e}"}
@@ -108,6 +119,7 @@ def node_risk(state: HedgeFundState) -> HedgeFundState:
 
 def node_portfolio_manager(state: HedgeFundState) -> HedgeFundState:
     from schemas import TradeProposal, RiskReview
+    PT.update(state["ticker"], "pm")
     if state.get("error") or not state.get("trade_proposal") or not state.get("risk_review"):
         return state
     proposal = TradeProposal(**state["trade_proposal"])
@@ -135,11 +147,8 @@ def node_log(state: HedgeFundState) -> HedgeFundState:
     )
     log_path = log_run(gs)
     print(f"[LOG] Saved to {log_path}")
+    PT.update(state["ticker"], "done")
     return state
-
-
-def should_continue(state: HedgeFundState) -> str:
-    return "error" if state.get("error") else "continue"
 
 
 # ── Build graph ────────────────────────────────────────────────────────────────
@@ -167,30 +176,3 @@ def build_graph(checkpointer=None):
     g.add_edge("log",               END)
 
     return g.compile(checkpointer=checkpointer)
-
-
-def run(ticker: str, use_checkpoint: bool = True) -> HedgeFundState:
-    """Run the full hedge fund pipeline for a given ticker."""
-    from datetime import datetime
-
-    init_state: HedgeFundState = {
-        "ticker":          ticker.upper(),
-        "market_data":     None,
-        "analyst_reports": [],
-        "debate_result":   None,
-        "trade_proposal":  None,
-        "risk_review":     None,
-        "final_decision":  None,
-        "memory_context":  "",
-        "error":           None,
-        "run_id":          datetime.now().strftime("%Y%m%d_%H%M%S"),
-    }
-
-    if use_checkpoint:
-        with SqliteSaver.from_conn_string("checkpoints.db") as checkpointer:
-            graph = build_graph(checkpointer)
-            config = {"configurable": {"thread_id": ticker}}
-            return graph.invoke(init_state, config=config)
-    else:
-        graph = build_graph(None)
-        return graph.invoke(init_state)
