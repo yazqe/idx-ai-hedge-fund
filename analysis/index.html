@@ -196,10 +196,14 @@
   .status-box.running{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue);display:block}
   .status-box.error{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);display:block}
   .status-box.done{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);display:block}
-  .progress-wrap{margin-top:10px;display:none}
-  .progress-track{background:#21262d;border-radius:6px;height:8px;overflow:hidden}
+  .progress-wrap{margin-top:12px;display:none}
+  .progress-step-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .progress-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;animation:pulse-dot 1.2s ease-in-out infinite}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+  .progress-step-text{font-size:12px;font-weight:600;color:var(--text)}
+  .progress-track{background:#21262d;border-radius:6px;height:6px;overflow:hidden}
   .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),#58cfff);border-radius:6px;transition:width .6s ease}
-  .progress-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px}
+  .progress-pct-row{text-align:right;font-size:10px;color:var(--muted);margin-top:3px}
   .result-area{margin-top:16px}
   .local-only{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--gold);margin-top:12px}
   .quick-tickers{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
@@ -334,13 +338,14 @@
       </div>
       <div class="status-box" id="status-box"></div>
       <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-step-row">
+          <span class="progress-dot" id="progress-dot"></span>
+          <span class="progress-step-text" id="progress-step">Memulai analisis...</span>
+        </div>
         <div class="progress-track">
           <div class="progress-fill" id="progress-fill" style="width:0%"></div>
         </div>
-        <div class="progress-label">
-          <span id="progress-step">Memulai...</span>
-          <span id="progress-pct">0%</span>
-        </div>
+        <div class="progress-pct-row" id="progress-pct">0%</div>
       </div>
       <div class="result-area" id="result-area"></div>
     </div>
@@ -931,7 +936,9 @@ async function pollResult(ticker) {
       setStatus('done', `✅ Analisis ${ticker} selesai!`);
       document.getElementById('result-area').innerHTML = renderSingleResult(d.result);
       document.getElementById('btn-run').disabled = false;
-      setTimeout(() => { document.getElementById('progress-wrap').style.display='none'; }, 2000);
+      var dot = document.getElementById('progress-dot');
+      if (dot) dot.style.animation = 'none', dot.style.background = 'var(--green)';
+      setTimeout(() => { document.getElementById('progress-wrap').style.display='none'; }, 2500);
     } else if (d.status === 'error') {
       clearInterval(_pollTimer);
       setProgress(0, '');
