@@ -865,6 +865,26 @@ function getApiUrl() {
 }
 var LOCAL_API = getApiUrl();
 let _pollTimer = null;
+var _analysisStart = 0;
+
+function estimateProgress(serverPct) {
+  if (serverPct > 5) return {pct: serverPct, step: null}; // server tracking works
+  var elapsed = (Date.now() - _analysisStart) / 1000;
+  var steps = [
+    [8,   12, 'Mengambil data pasar...'],
+    [20,  22, 'Memuat histori analisis...'],
+    [35,  35, 'Menjalankan 4 analis...'],
+    [60,  55, 'Laporan analis selesai...'],
+    [80,  65, 'Debat Bull vs Bear...'],
+    [100, 75, 'Trader membuat proposal...'],
+    [120, 85, 'Evaluasi risiko...'],
+    [Infinity, 93, 'Portfolio Manager memutuskan...'],
+  ];
+  for (var i=0; i<steps.length; i++) {
+    if (elapsed < steps[i][0]) return {pct: steps[i][1], step: steps[i][2]};
+  }
+  return {pct: 93, step: 'Portfolio Manager memutuskan...'};
+}
 
 function setTicker(t) {
   document.getElementById('ticker-input').value = t;
@@ -899,8 +919,11 @@ async function pollResult(ticker) {
     const r = await apiFetch(`${LOCAL_API}/api/result/${ticker}`);
     const d = await r.json();
 
-    // Update progress bar from server
-    if (d.progress) setProgress(d.progress.pct, d.progress.step);
+    // Update progress — use server value, fallback to time-based estimate
+    if (d.progress) {
+      var prog = estimateProgress(d.progress.pct);
+      setProgress(prog.pct, prog.step || d.progress.step);
+    }
 
     if (d.status === 'done') {
       clearInterval(_pollTimer);
@@ -937,6 +960,7 @@ async function runAnalysis() {
     return;
   }
 
+  _analysisStart = Date.now();
   setStatus('running', `🤖 Menganalisis <strong>${ticker}</strong>…`);
   setProgress(5, 'Memulai analisis...');
   await apiFetch(`${LOCAL_API}/api/analyze/${ticker}`, {method:'POST'});
