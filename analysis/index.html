@@ -289,17 +289,48 @@
   <div class="analyze-section">
     <!-- Shown when accessed from GitHub Pages (not local) -->
     <div id="analyze-remote" style="display:none">
-      <div class="form-card" style="text-align:center;padding:40px 32px">
-        <div style="font-size:32px;margin-bottom:16px">🖥️</div>
-        <div class="form-title" style="margin-bottom:10px">Fitur ini memerlukan server lokal</div>
-        <div class="form-sub" style="margin-bottom:24px;max-width:380px;margin-left:auto;margin-right:auto">
-          Analyze Ticker berjalan di Mac Anda. Buka versi lokal untuk menggunakan fitur ini secara real-time.
+      <div class="form-card">
+        <div class="form-title">🔍 Analyze IDX Stock</div>
+        <div class="form-sub">Masukkan kode saham IDX untuk analisis AI lengkap</div>
+
+        <!-- Custom API URL input -->
+        <div style="margin-bottom:16px;padding:14px;background:#1c2128;border:1px solid var(--border);border-radius:8px">
+          <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">
+            🔗 API Server URL
+          </div>
+          <div style="display:flex;gap:8px">
+            <input id="api-url-input" type="text" placeholder="https://your-server.railway.app"
+              style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:monospace;outline:none"
+              value="">
+            <button onclick="saveApiUrl()" style="padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Simpan</button>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+            💡 Opsi:
+            <a href="https://127.0.0.1:8765/" target="_blank" style="color:var(--blue)">WiFi sama</a> ·
+            <span style="color:var(--muted)">ngrok · Railway · Render</span>
+            <span id="api-url-status" style="float:right;font-weight:600"></span>
+          </div>
         </div>
-        <a href="https://127.0.0.1:8765/" target="_blank"
-           style="display:inline-block;background:var(--blue);color:#fff;padding:12px 28px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none">
-          Buka Versi Lokal →
-        </a>
-        <div style="margin-top:16px;font-size:11px;color:var(--muted)">https://127.0.0.1:8765/</div>
+
+        <div class="input-row">
+          <input class="ticker-input" id="ticker-input" type="text" placeholder="contoh: BBCA" maxlength="6"
+                 oninput="this.value=this.value.toUpperCase()"
+                 onkeydown="if(event.key==='Enter')runAnalysis()">
+          <button class="btn-analyze" id="btn-run" onclick="runAnalysis()">▶ Analyze</button>
+        </div>
+        <div class="quick-tickers">
+          <span style="font-size:11px;color:var(--muted);align-self:center">Quick pick:</span>
+          <button class="quick-btn" onclick="setTicker('BBCA')">BBCA</button>
+          <button class="quick-btn" onclick="setTicker('BUMI')">BUMI</button>
+          <button class="quick-btn" onclick="setTicker('GOTO')">GOTO</button>
+          <button class="quick-btn" onclick="setTicker('TLKM')">TLKM</button>
+          <button class="quick-btn" onclick="setTicker('ANTM')">ANTM</button>
+          <button class="quick-btn" onclick="setTicker('BBRI')">BBRI</button>
+          <button class="quick-btn" onclick="setTicker('BMRI')">BMRI</button>
+          <button class="quick-btn" onclick="setTicker('MDKA')">MDKA</button>
+        </div>
+        <div class="status-box" id="status-box"></div>
+        <div class="result-area" id="result-area"></div>
       </div>
     </div>
 
@@ -780,6 +811,33 @@ switchLang(LANG);
 var IS_LOCAL = window.location.hostname === '127.0.0.1';
 document.getElementById(IS_LOCAL ? 'analyze-local' : 'analyze-remote').style.display = 'block';
 
+// Load saved API URL into input
+(function(){
+  var saved = localStorage.getItem('idx_api_url') || '';
+  var inp = document.getElementById('api-url-input');
+  if (inp) { inp.value = saved; showApiStatus(saved); }
+})();
+
+function showApiStatus(url) {
+  var el = document.getElementById('api-url-status');
+  if (!el) return;
+  el.textContent = url && url !== 'https://127.0.0.1:8765' ? '✅ Custom URL aktif' : '';
+  el.style.color = 'var(--green)';
+}
+
+function saveApiUrl() {
+  var url = (document.getElementById('api-url-input').value || '').trim().replace(/\/+$/,'');
+  if (!url) return;
+  localStorage.setItem('idx_api_url', url);
+  LOCAL_API = url;
+  showApiStatus(url);
+  setStatus('running', '🔗 Menghubungkan ke ' + url + '...');
+  fetch(url + '/api/health', {signal: AbortSignal.timeout(5000)})
+    .then(r => r.json())
+    .then(d => setStatus('done', '✅ Terhubung! Server: ' + (d.time||'ok')))
+    .catch(() => setStatus('error', '❌ Tidak bisa terhubung ke ' + url));
+}
+
 // ── Tabs ──────────────────────────────────────────────────────
 function switchTab(name, el) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -794,7 +852,11 @@ function switchTab(name, el) {
 }
 
 // ── Analyze Ticker ─────────────────────────────────────────────
-const LOCAL_API = 'https://127.0.0.1:8765';
+function getApiUrl() {
+  if (window.location.hostname === '127.0.0.1') return 'https://127.0.0.1:8765';
+  return localStorage.getItem('idx_api_url') || 'https://127.0.0.1:8765';
+}
+var LOCAL_API = getApiUrl();
 let _pollTimer = null;
 
 function setTicker(t) {
