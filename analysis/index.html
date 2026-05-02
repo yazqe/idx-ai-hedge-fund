@@ -956,14 +956,18 @@ function estimateProgress(serverPct) {
   if (serverPct > 5) return {pct: serverPct, step: null}; // server tracking works
   var elapsed = (Date.now() - _analysisStart) / 1000;
   var steps = [
-    [8,   12, 'Mengambil data pasar...'],
-    [20,  22, 'Memuat histori analisis...'],
-    [35,  35, 'Menjalankan 4 analis...'],
-    [60,  55, 'Laporan analis selesai...'],
-    [80,  65, 'Debat Bull vs Bear...'],
-    [100, 75, 'Trader membuat proposal...'],
-    [120, 85, 'Evaluasi risiko...'],
-    [Infinity, 93, 'Portfolio Manager memutuskan...'],
+    [10,  12, 'Mengambil data pasar...'],
+    [25,  22, 'Memuat histori analisis...'],
+    [45,  35, 'Menjalankan 4 analis...'],
+    [75,  55, 'Laporan analis selesai...'],
+    [100, 65, 'Debat Bull vs Bear...'],
+    [130, 75, 'Trader membuat proposal...'],
+    [160, 83, 'Evaluasi risiko...'],
+    [200, 88, 'Portfolio Manager memutuskan...'],
+    [250, 91, 'Menganalisis keputusan akhir...'],
+    [300, 94, 'Hampir selesai, mohon tunggu...'],
+    [360, 96, 'Memproses hasil...'],
+    [Infinity, 97, 'Menyelesaikan analisis...'],
   ];
   for (var i=0; i<steps.length; i++) {
     if (elapsed < steps[i][0]) return {pct: steps[i][1], step: steps[i][2]};
@@ -1061,7 +1065,7 @@ async function runAnalysis() {
   clearInterval(_pollTimer);
   _pollTimer = setInterval(()=>{
     var elapsed = (Date.now() - _analysisStart) / 1000;
-    if (elapsed > 360) { // 6 minutes timeout
+    if (elapsed > 480) { // 8 minutes timeout
       clearInterval(_pollTimer);
       setProgress(0, '');
       setStatus('error', '⏱️ Analisis melebihi batas waktu. Coba lagi.');
