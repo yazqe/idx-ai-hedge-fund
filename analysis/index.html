@@ -802,6 +802,68 @@ if (IS_GITHUB_PAGES) {
   document.getElementById('conn-settings').style.display = 'block';
 }
 
+// ── PIN check on load: prompt if server requires PIN ──────────
+(function checkPinOnLoad() {
+  var savedPin = getSavedPin();
+  apiFetch(LOCAL_API + '/api/health', {signal: AbortSignal.timeout(5000)})
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (d.pin_required && !savedPin) {
+        showPinPrompt();
+      }
+    })
+    .catch(function(){});
+})();
+
+function showPinPrompt() {
+  var overlay = document.createElement('div');
+  overlay.id = 'pin-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999';
+  overlay.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px 32px;width:320px;text-align:center">
+      <div style="font-size:24px;margin-bottom:12px">🔐</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px">PIN Diperlukan</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Masukkan PIN untuk mengakses fitur analisis</div>
+      <input id="pin-prompt-input" type="password" placeholder="Masukkan PIN..."
+        style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;text-align:center;letter-spacing:4px;outline:none;margin-bottom:12px"
+        onkeydown="if(event.key==='Enter')submitPinPrompt()">
+      <button onclick="submitPinPrompt()"
+        style="width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
+        Masuk
+      </button>
+      <div id="pin-prompt-error" style="color:var(--red);font-size:12px;margin-top:8px;display:none">PIN salah, coba lagi.</div>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(function(){ document.getElementById('pin-prompt-input').focus(); }, 100);
+}
+
+function submitPinPrompt() {
+  var pin = (document.getElementById('pin-prompt-input').value || '').trim();
+  if (!pin) return;
+  apiFetch(LOCAL_API + '/api/verify-pin', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json', 'X-API-Pin': pin},
+    body: JSON.stringify({pin: pin})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d) {
+    if (d.valid) {
+      localStorage.setItem('idx_api_pin', pin);
+      var ov = document.getElementById('pin-overlay');
+      if (ov) ov.remove();
+      // Update pin input in settings if visible
+      var pi = document.getElementById('pin-input');
+      if (pi) pi.value = pin;
+    } else {
+      var err = document.getElementById('pin-prompt-error');
+      if (err) err.style.display = 'block';
+      document.getElementById('pin-prompt-input').value = '';
+      document.getElementById('pin-prompt-input').focus();
+    }
+  })
+  .catch(function(){ });
+}
+
 // Load saved API URL into input
 (function(){
   var saved = localStorage.getItem('idx_api_url') || '';
