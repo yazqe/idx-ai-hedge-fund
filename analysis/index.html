@@ -412,6 +412,7 @@
   <button class="filter-btn" onclick="setFilter('VALUE',this)" data-i18n="filter_value">💰 Nilai Teratas</button>
   <button class="filter-btn" onclick="setFilter('GAINER',this)" data-i18n="filter_gainers">📈 Penguatan</button>
   <button class="filter-btn" onclick="setFilter('FREQUENCY',this)" data-i18n="filter_frequency">🔄 Frekuensi</button>
+  <button class="filter-btn" onclick="setFilter('SYARIAH',this)" style="border-color:#2ea043;color:#3fb950">☪️ Syariah</button>
   <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="filter-count"></span>
 </div>
 
@@ -710,8 +711,9 @@ function renderStock(r) {
         <span class="sc-ticker">${r.ticker}</span>
         <span class="badge ${bdg}">${icon} ${r.decision}</span>
         <span style="font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 8px;color:var(--muted)">${r.sector||'–'}</span>
-        <div style="display:flex;gap:4px;align-items:center">
+        <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
           ${(r.sources||[]).map(s=>`<span class="src-badge ${(SM[s]||{cls:'src-custom'}).cls}">${(SM[s]||{label:s}).label}</span>`).join('')}
+          ${r.is_syariah === false ? '<span class="src-badge" style="background:#2d1619;color:#f85149;border-color:#da363366">Non-Syariah</span>' : (r.is_syariah === true ? '<span class="src-badge" style="background:#1a2d1e;color:#3fb950;border-color:#2ea04366">☪️ Syariah</span>' : '')}
         </div>
         <div class="price-block">
           <span class="price-main">Rp${fmt(r.market_price)}</span>
@@ -740,9 +742,14 @@ function renderStock(r) {
 
 function renderCards(results) {
   var noSourceData = results.length > 0 && results.every(r => !(r.sources||[]).length);
-  var filtered = (_activeFilter === 'all' || noSourceData)
-    ? results
-    : results.filter(function(r){ return (r.sources||[]).includes(_activeFilter); });
+  var filtered;
+  if (_activeFilter === 'all' || noSourceData) {
+    filtered = results;
+  } else if (_activeFilter === 'SYARIAH') {
+    filtered = results.filter(function(r){ return r.is_syariah !== false; });
+  } else {
+    filtered = results.filter(function(r){ return (r.sources||[]).includes(_activeFilter); });
+  }
 
   var fc = document.getElementById('filter-count');
   if (fc) fc.textContent = (_activeFilter === 'all' || noSourceData) ? '' : filtered.length + ' saham';

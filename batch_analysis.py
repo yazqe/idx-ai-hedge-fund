@@ -18,6 +18,19 @@ HEADERS = {
 }
 SUSPENDED = {"WBSA", "BAPA"}
 
+# Saham NON-SYARIAH (bank konvensional, rokok, alkohol)
+# Referensi: Daftar Efek Syariah OJK + Jakarta Islamic Index
+NON_SYARIAH = {
+    # Bank konvensional (mengandung riba)
+    "BBCA", "BBRI", "BMRI", "BBNI", "BNGA", "BDMN", "NISP", "MEGA",
+    "PNBN", "BJTM", "BNII", "BKSW", "AGRO", "BTPN", "BMAS", "BCIC",
+    "BABP", "BBYB", "BGTG", "BINA", "BJBR", "BNBA",
+    # Rokok / tembakau
+    "HMSP", "GGRM", "WIIM", "ITIC",
+    # Alkohol
+    "MLBI", "DLTA",
+}
+
 
 def get_ihsg():
     """Fetch IHSG (Jakarta Composite Index) latest value."""
@@ -207,7 +220,8 @@ def main(tickers=None):
         print(f"  → Starting {ticker} ({', '.join(srcs)})...")
         result = run_analysis(ticker)
         if result:
-            result["sources"] = srcs
+            result["sources"]    = srcs
+            result["is_syariah"] = ticker not in NON_SYARIAH
         return ticker, result
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
