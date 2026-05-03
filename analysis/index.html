@@ -908,6 +908,12 @@ function apiFetch(url, opts) {
       localStorage.removeItem('idx_api_pin');
       showPinPrompt();
     }
+    if (r.status === 429) {
+      r.clone().json().then(function(d) {
+        setStatus('error', '⏳ ' + (d.error || 'Batas harian tercapai. Coba lagi besok.'));
+        document.getElementById('btn-run').disabled = false;
+      }).catch(function(){});
+    }
     return r;
   });
 }

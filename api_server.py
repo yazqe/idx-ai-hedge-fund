@@ -16,13 +16,43 @@ CORS(app)
 API_PIN = os.environ.get("API_PIN", "").strip()
 
 def _check_pin():
-    """Return True if PIN is valid or not required."""
     if not API_PIN:
         return True
     return request.headers.get("X-API-Pin", "") == API_PIN
 
 def _pin_error():
     return jsonify({"error": "PIN required", "code": 401}), 401
+
+# ── Rate limiting (max analyses per IP per day) ─────────────────
+import time as _time
+from collections import defaultdict
+
+DAILY_LIMIT   = int(os.environ.get("DAILY_LIMIT", "10"))  # per IP per day
+_rate_log     = defaultdict(list)  # ip → [timestamps]
+
+def _get_ip():
+    return request.headers.get("X-Forwarded-For", request.remote_addr or "").split(",")[0].strip()
+
+def _check_rate():
+    """Return True if within rate limit."""
+    if not DAILY_LIMIT:
+        return True
+    ip  = _get_ip()
+    now = _time.time()
+    day = 86400
+    _rate_log[ip] = [t for t in _rate_log[ip] if now - t < day]
+    if len(_rate_log[ip]) >= DAILY_LIMIT:
+        return False
+    _rate_log[ip].append(now)
+    return True
+
+def _rate_error():
+    ip = _get_ip()
+    used = len(_rate_log[ip])
+    return jsonify({
+        "error": f"Batas harian tercapai ({used}/{DAILY_LIMIT} analisis). Coba lagi besok.",
+        "code": 429, "used": used, "limit": DAILY_LIMIT
+    }), 429
 
 # ── In-memory state ────────────────────────────────────────────
 _running: dict = {}
@@ -54,8 +84,15 @@ def _do_analysis(ticker: str):
 
 @app.route("/api/health")
 def health():
-    return jsonify({"ok": True, "time": datetime.now(WIB).strftime("%H:%M WIB"),
-                    "pin_required": bool(API_PIN)})
+    ip   = _get_ip()
+    now  = _time.time()
+    used = len([t for t in _rate_log.get(ip, []) if now - t < 86400])
+    return jsonify({
+        "ok": True,
+        "time": datetime.now(WIB).strftime("%H:%M WIB"),
+        "pin_required": bool(API_PIN),
+        "rate": {"used": used, "limit": DAILY_LIMIT},
+    })
 
 @app.route("/api/verify-pin", methods=["POST"])
 def verify_pin():
@@ -69,6 +106,8 @@ def analyze(ticker: str):
     import time
     if not _check_pin():
         return _pin_error()
+    if not _check_rate():
+        return _rate_error()
     ticker = ticker.upper()
     if _running.get(ticker) == "running":
         elapsed = time.time() - _started.get(ticker, 0)
