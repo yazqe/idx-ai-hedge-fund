@@ -352,16 +352,9 @@
                onkeydown="if(event.key==='Enter')runAnalysis()">
         <button class="btn-analyze" id="btn-run" onclick="runAnalysis()">▶ Analyze</button>
       </div>
-      <div class="quick-tickers">
-        <span style="font-size:11px;color:var(--muted);align-self:center">Quick pick:</span>
-        <button class="quick-btn" onclick="setTicker('BBCA')">BBCA</button>
-        <button class="quick-btn" onclick="setTicker('BUMI')">BUMI</button>
-        <button class="quick-btn" onclick="setTicker('GOTO')">GOTO</button>
-        <button class="quick-btn" onclick="setTicker('TLKM')">TLKM</button>
-        <button class="quick-btn" onclick="setTicker('ANTM')">ANTM</button>
-        <button class="quick-btn" onclick="setTicker('BBRI')">BBRI</button>
-        <button class="quick-btn" onclick="setTicker('BMRI')">BMRI</button>
-        <button class="quick-btn" onclick="setTicker('MDKA')">MDKA</button>
+      <div class="quick-tickers" id="quick-tickers">
+        <span style="font-size:11px;color:var(--muted);align-self:center">Top Value:</span>
+        <span style="font-size:11px;color:var(--muted)">Memuat...</span>
       </div>
       <div class="status-box" id="status-box"></div>
       <div class="progress-wrap" id="progress-wrap">
@@ -774,6 +767,25 @@ function renderCards(results) {
     filtered.map(renderStock).join('');
 }
 
+function updateQuickPicks(results) {
+  var el = document.getElementById('quick-tickers');
+  if (!el) return;
+  // Top 10 VALUE stocks, fallback to all results sorted by position
+  var valueStocks = results.filter(function(r){ return (r.sources||[]).includes('VALUE'); }).slice(0,10);
+  if (!valueStocks.length) valueStocks = results.slice(0,10);
+  if (!valueStocks.length) return;
+  var label = '<span style="font-size:11px;color:var(--muted);align-self:center">Top Value:</span>';
+  var btns = valueStocks.map(function(r) {
+    var chg = (r.market_change||0).toFixed(1);
+    var color = r.market_change > 0 ? 'var(--green)' : r.market_change < 0 ? 'var(--red)' : 'var(--muted)';
+    return '<button class="quick-btn" onclick="setTicker(\''+r.ticker+'\')" title="'+r.ticker+' '+(r.market_change>0?'+':'')+chg+'%">'
+      + r.ticker
+      + '<span style="font-size:9px;color:'+color+';margin-left:3px">'+(r.market_change>0?'+':'')+chg+'%</span>'
+      + '</button>';
+  }).join('');
+  el.innerHTML = label + btns;
+}
+
 function setFilter(src, btn) {
   _activeFilter = src;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -810,6 +822,7 @@ async function load() {
 
     _allResults = d.results||[];
     renderCards(_allResults);
+    updateQuickPicks(_allResults);
   } catch(e) {
     document.getElementById('main').innerHTML = `
       <div class="loading">
