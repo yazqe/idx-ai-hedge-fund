@@ -87,11 +87,13 @@ def health():
     ip   = _get_ip()
     now  = _time.time()
     used = len([t for t in _rate_log.get(ip, []) if now - t < 86400])
+    has_pin = bool(API_PIN) and (request.headers.get("X-API-Pin","") == API_PIN)
     return jsonify({
         "ok": True,
         "time": datetime.now(WIB).strftime("%H:%M WIB"),
-        "pin_required": bool(API_PIN),
-        "rate": {"used": used, "limit": DAILY_LIMIT},
+        "pin_required": False,          # no longer blocks access
+        "unlimited": has_pin,           # True if valid PIN = no rate limit
+        "rate": {"used": used, "limit": DAILY_LIMIT if not has_pin else 0},
     })
 
 @app.route("/api/verify-pin", methods=["POST"])
@@ -104,10 +106,11 @@ def verify_pin():
 @app.route("/api/analyze/<ticker>", methods=["POST"])
 def analyze(ticker: str):
     import time
-    if not _check_pin():
-        return _pin_error()
-    if not _check_rate():
-        return _rate_error()
+    # Valid PIN = unlimited access; no/wrong PIN = rate limited
+    has_valid_pin = bool(API_PIN) and _check_pin()
+    if not has_valid_pin:
+        if not _check_rate():
+            return _rate_error()
     ticker = ticker.upper()
     if _running.get(ticker) == "running":
         elapsed = time.time() - _started.get(ticker, 0)
