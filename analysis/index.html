@@ -140,7 +140,7 @@
   @keyframes spin{to{transform:rotate(360deg)}}
 
   /* ── Improved card internals ── */
-  .sc-header-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .sc-header-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
   .sc-header-mid{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:7px;padding-top:7px;border-top:1px solid var(--border)}
   .sc-header-bot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
   .price-block{display:flex;flex-direction:column;margin-left:auto;text-align:right}
@@ -182,8 +182,8 @@
   .tab-content{display:none}.tab-content.active{display:block}
 
   /* ── Analyze form ── */
-  .analyze-section{max-width:700px;margin:24px auto;padding:0 16px}
-  .form-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px 20px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .analyze-section{max-width:700px;margin:24px auto;padding:0 16px;box-sizing:border-box;width:100%}
+  .form-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px 20px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden;box-sizing:border-box;width:100%}
   .form-title{font-size:16px;font-weight:700;margin-bottom:6px}
   .form-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
   .input-row{display:flex;gap:8px}
@@ -209,7 +209,7 @@
   .progress-track{background:#21262d;border-radius:6px;height:6px;overflow:hidden}
   .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),#58cfff);border-radius:6px;transition:width .6s ease}
   .progress-pct-row{text-align:right;font-size:10px;color:var(--muted);margin-top:3px}
-  .result-area{margin-top:16px}
+  .result-area{margin-top:16px;overflow:hidden;max-width:100%}
   /* PIN modal */
   #pin-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center}
   #pin-modal.show{display:flex}
@@ -328,7 +328,7 @@
       <div class="form-sub">Masukkan kode saham IDX untuk analisis AI lengkap (Fundamental · Teknikal · Sentimen · Makro · Debat · Risiko)</div>
 
       <!-- Connection settings: only shown on GitHub Pages -->
-      <div id="conn-settings" style="display:none;margin-bottom:16px;padding:14px;background:#1c2128;border:1px solid var(--border);border-radius:8px">
+      <div id="conn-settings" style="display:none;margin-bottom:16px;padding:14px;background:#1c2128;border:1px solid var(--border);border-radius:8px;overflow:hidden">
         <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">⚙️ Koneksi Server</div>
         <div style="display:flex;gap:8px;margin-bottom:8px">
           <input id="api-url-input" type="text" placeholder="https://your-app.up.railway.app"
