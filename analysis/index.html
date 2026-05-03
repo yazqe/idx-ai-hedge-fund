@@ -182,16 +182,21 @@
   .tab-content{display:none}.tab-content.active{display:block}
 
   /* ── Analyze form ── */
-  .analyze-section{max-width:700px;margin:32px auto;padding:0 32px}
-  .form-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px 32px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .analyze-section{max-width:700px;margin:24px auto;padding:0 16px}
+  .form-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px 20px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
   .form-title{font-size:16px;font-weight:700;margin-bottom:6px}
-  .form-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
-  .input-row{display:flex;gap:10px}
-  .ticker-input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;text-transform:uppercase;outline:none;transition:border-color .15s}
+  .form-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+  .input-row{display:flex;gap:8px}
+  .ticker-input{flex:1;min-width:0;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;text-transform:uppercase;outline:none;transition:border-color .15s}
   .ticker-input:focus{border-color:var(--blue)}
-  .btn-analyze{padding:10px 24px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .15s}
+  .btn-analyze{padding:10px 20px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .15s;flex-shrink:0}
   .btn-analyze:hover{opacity:.85}
   .btn-analyze:disabled{opacity:.5;cursor:not-allowed}
+  @media(max-width:480px){
+    .analyze-section{padding:0 12px;margin:16px auto}
+    .form-card{padding:18px 16px}
+    .btn-analyze{padding:10px 14px;font-size:12px}
+  }
   .status-box{margin-top:16px;padding:12px 16px;border-radius:8px;font-size:12px;display:none}
   .status-box.running{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue);display:block}
   .status-box.error{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);display:block}
@@ -211,7 +216,8 @@
   #pin-modal-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:32px;width:300px;text-align:center}
   .local-only{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--gold);margin-top:12px}
   .quick-tickers{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-  .quick-btn{padding:5px 12px;background:#21262d;border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text);transition:background .15s}
+  .quick-btn{padding:5px 10px;background:#21262d;border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text);transition:background .15s}
+  .quick-tickers{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
   .quick-btn:hover{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue)}
 </style>
 </head>
