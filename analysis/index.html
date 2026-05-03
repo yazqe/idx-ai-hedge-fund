@@ -770,18 +770,12 @@ function renderCards(results) {
 function updateQuickPicks(results) {
   var el = document.getElementById('quick-tickers');
   if (!el) return;
-  // Top 10 VALUE stocks, fallback to all results sorted by position
   var valueStocks = results.filter(function(r){ return (r.sources||[]).includes('VALUE'); }).slice(0,10);
   if (!valueStocks.length) valueStocks = results.slice(0,10);
   if (!valueStocks.length) return;
-  var label = '<span style="font-size:11px;color:var(--muted);align-self:center">Top Value:</span>';
+  var label = '<span style="font-size:11px;color:var(--muted);align-self:center">Quick pick:</span>';
   var btns = valueStocks.map(function(r) {
-    var chg = (r.market_change||0).toFixed(1);
-    var color = r.market_change > 0 ? 'var(--green)' : r.market_change < 0 ? 'var(--red)' : 'var(--muted)';
-    return '<button class="quick-btn" onclick="setTicker(\''+r.ticker+'\')" title="'+r.ticker+' '+(r.market_change>0?'+':'')+chg+'%">'
-      + r.ticker
-      + '<span style="font-size:9px;color:'+color+';margin-left:3px">'+(r.market_change>0?'+':'')+chg+'%</span>'
-      + '</button>';
+    return '<button class="quick-btn" onclick="setTicker(\''+r.ticker+'\')">'+r.ticker+'</button>';
   }).join('');
   el.innerHTML = label + btns;
 }
