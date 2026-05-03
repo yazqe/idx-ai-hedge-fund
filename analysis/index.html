@@ -368,6 +368,7 @@
         <div class="progress-step-row">
           <span class="progress-dot" id="progress-dot"></span>
           <span class="progress-step-text" id="progress-step">Memulai analisis...</span>
+          <span id="progress-timer" style="margin-left:auto;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap"></span>
         </div>
         <div class="progress-track">
           <div class="progress-fill" id="progress-fill" style="width:0%"></div>
@@ -956,7 +957,30 @@ function getApiUrl() {
 }
 var LOCAL_API = getApiUrl();
 let _pollTimer = null;
+let _timerInterval = null;
 var _analysisStart = 0;
+
+function startTimer() {
+  stopTimer();
+  _timerInterval = setInterval(function() {
+    var elapsed = Math.floor((Date.now() - _analysisStart) / 1000);
+    var el = document.getElementById('progress-timer');
+    if (!el) return;
+    if (elapsed < 60) {
+      el.textContent = elapsed + 's';
+    } else {
+      var m = Math.floor(elapsed / 60);
+      var s = elapsed % 60;
+      el.textContent = m + 'm ' + (s < 10 ? '0' : '') + s + 's';
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
+  var el = document.getElementById('progress-timer');
+  if (el) el.textContent = '';
+}
 
 function estimateProgress(serverPct) {
   if (serverPct > 5) return {pct: serverPct, step: null}; // server tracking works
@@ -1022,9 +1046,14 @@ async function pollResult(ticker) {
 
     if (d.status === 'done') {
       clearInterval(_pollTimer);
+      stopTimer();
+      var elapsed = Math.floor((Date.now() - _analysisStart) / 1000);
+      var timeStr = elapsed < 60 ? elapsed+'s' : Math.floor(elapsed/60)+'m '+(elapsed%60)+'s';
       setProgress(100, 'Selesai ✓');
       var dot = document.getElementById('progress-dot');
       if (dot) { dot.style.animation = 'none'; dot.style.background = 'var(--green)'; }
+      var timerEl = document.getElementById('progress-timer');
+      if (timerEl) timerEl.textContent = '✓ ' + timeStr;
       try {
         document.getElementById('result-area').innerHTML = renderSingleResult(d.result);
         setStatus('done', `✅ Analisis ${ticker} selesai!`);
@@ -1036,6 +1065,7 @@ async function pollResult(ticker) {
       setTimeout(() => { document.getElementById('progress-wrap').style.display='none'; }, 2500);
     } else if (d.status === 'error') {
       clearInterval(_pollTimer);
+      stopTimer();
       setProgress(0, '');
       setStatus('error', `❌ Analisis ${ticker} gagal di server.`);
       document.getElementById('btn-run').disabled = false;
@@ -1065,6 +1095,7 @@ async function runAnalysis() {
   }
 
   _analysisStart = Date.now();
+  startTimer();
   setStatus('running', `🤖 Menganalisis <strong>${ticker}</strong>…`);
   setProgress(5, 'Memulai analisis...');
   await apiFetch(`${LOCAL_API}/api/analyze/${ticker}`, {method:'POST'});
@@ -1073,6 +1104,7 @@ async function runAnalysis() {
     var elapsed = (Date.now() - _analysisStart) / 1000;
     if (elapsed > 900) { // 15 minutes timeout
       clearInterval(_pollTimer);
+      stopTimer();
       setProgress(0, '');
       setStatus('error', '⏱️ Analisis melebihi batas waktu. Coba lagi.');
       document.getElementById('btn-run').disabled = false;
