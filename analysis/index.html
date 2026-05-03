@@ -746,7 +746,7 @@ function renderCards(results) {
   if (_activeFilter === 'all' || noSourceData) {
     filtered = results;
   } else if (_activeFilter === 'SYARIAH') {
-    filtered = results.filter(function(r){ return r.is_syariah !== false; });
+    filtered = results.filter(function(r){ return r.is_syariah === true; });
   } else {
     filtered = results.filter(function(r){ return (r.sources||[]).includes(_activeFilter); });
   }
