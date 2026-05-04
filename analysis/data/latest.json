@@ -1,17 +1,924 @@
 {
-  "generated_at": "04 May 2026 18:22 WIB",
-  "date": "04 May 2026",
+  "generated_at": "05 May 2026 01:43 WIB",
+  "date": "05 May 2026",
   "ihsg": {
     "value": 6971.953,
     "change_pct": 0.22,
     "change_abs": 15.15
   },
-  "total": 0,
+  "total": 17,
   "execute_count": 0,
-  "monitor_count": 0,
-  "pass_count": 0,
-  "value_count": 0,
-  "gainer_count": 0,
-  "frequency_count": 0,
-  "results": []
+  "monitor_count": 2,
+  "pass_count": 15,
+  "value_count": 10,
+  "gainer_count": 5,
+  "frequency_count": 5,
+  "results": [
+    {
+      "ticker": "BCIP",
+      "decision": "MONITOR",
+      "action": null,
+      "entry_price": 89.0,
+      "target_price": 108.0,
+      "stop_loss": 81.0,
+      "position_size": 4.5,
+      "reasoning": "Trade proposal contains multiple unresolved risk factors that violate portfolio risk parameters. Primary concerns: (1) Risk review explicitly UNAPPROVED with HIGH risk level; (2) Max drawdown of 12.36% significantly exceeds 8% tolerance; (3) Risk/reward ratio 1.45x below minimum threshold of 1.5x; (4) RSI 68.63 indicates overbought conditions suggesting elevated entry risk; (5) D/E ratio 2.973 is dangerously near maximum threshold with acknowledged operational distress. While the contrarian tech",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "technical",
+          "signal": "BUY",
+          "confidence": 0.72
+        },
+        {
+          "type": "sentiment",
+          "signal": "BUY",
+          "confidence": 0.72
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.65
+        }
+      ],
+      "debate_consensus": "BUY",
+      "debate_winner": "BULL",
+      "debate_summary": "# BCIP Debate Summary\n\nThe bull case argues BCIP's 34.85% rally on elevated volume signals institutional accumulation and a potential sector turnaround despite fundamental weakness, while the bear case warns this is a dangerous momentum trap masking operational deterioration with negative growth, po",
+      "risk_level": "HIGH",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio 1.45x below minimum threshold of 1.5x",
+        "RSI 68.63 indicates overbought conditions",
+        "D/E ratio 2.973 near maximum threshold of 3.0",
+        "Max drawdown 12.36% exceeds 8% tolerance limit"
+      ],
+      "market_price": 89.0,
+      "market_change": 34.85,
+      "sector": "Real Estate",
+      "rsi": 68.63,
+      "analyzed_at": "05 May 2026 01:46 WIB",
+      "sources": [
+        "GAINER",
+        "FREQUENCY"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "BBRI",
+      "decision": "MONITOR",
+      "action": "HOLD",
+      "entry_price": 3040.0,
+      "target_price": 3380.0,
+      "stop_loss": 2890.0,
+      "position_size": 0.0,
+      "reasoning": "BBRI exhibits critical fundamental-technical divergence (82% BUY vs 78% SELL) indicating institutional recognition of macro headwinds rather than temporary panic. Historical pattern shows this divergence consistently precedes losses when macro conditions remain structurally negative. Current RSI 27.4 oversold signal is NOT capitulation—it reflects institutional exits due to USD/IDR weakness, foreign outflows, and BI rate cycle pressures. Maintain zero position until: (1) D/E ratio verified and c",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "BUY",
+          "confidence": 0.82
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.78
+        },
+        {
+          "type": "sentiment",
+          "signal": "HOLD",
+          "confidence": 0.55
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.72
+        }
+      ],
+      "debate_consensus": "HOLD",
+      "debate_winner": null,
+      "debate_summary": "# BBRI Debate Summary\n\n**Bull Case:** BBRI offers exceptional value with an 8.08 P/E ratio well below sector averages and a strong 18.14% ROE, supported by 16.3% revenue growth; current technical weakness represents a buying opportunity with oversold RSI conditions creating asymmetric risk/reward.\n\n",
+      "risk_level": "LOW",
+      "risk_approved": true,
+      "risk_flags": [
+        "RSI at 27.4 indicates oversold conditions - potential volatility",
+        "D/E ratio not available - unable to assess leverage risk",
+        "Hold action with zero position requires no immediate capital deployment"
+      ],
+      "market_price": 3040.0,
+      "market_change": 1.67,
+      "sector": "Financial Services",
+      "rsi": 27.4,
+      "analyzed_at": "05 May 2026 01:45 WIB",
+      "sources": [
+        "VALUE"
+      ],
+      "is_syariah": false
+    },
+    {
+      "ticker": "BBCA",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": 5900.0,
+      "target_price": 6400.0,
+      "stop_loss": 5500.0,
+      "position_size": 0.0,
+      "reasoning": "BBCA fails critical risk/reward threshold. Current setup offers only 1.25x R/R ratio versus portfolio minimum requirement of 1.5x. Risk review explicitly flags insufficient risk/reward compensation. Trade history demonstrates consistent pattern: fundamental-technical disconnect (82% BUY vs 85% SELL) historically leads to whipsaw losses when entry is premature. RSI 24.53 indicates oversold volatility, not reversal confirmation—portfolio experience shows wait for RSI >30 + MACD confirmation before",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "BUY",
+          "confidence": 0.82
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.85
+        },
+        {
+          "type": "sentiment",
+          "signal": "HOLD",
+          "confidence": 0.65
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.72
+        }
+      ],
+      "debate_consensus": "HOLD",
+      "debate_winner": null,
+      "debate_summary": "# BBCA Debate Summary\n\n**Bull vs. Bear:** The bull case argues BBCA's 39.2% decline represents an oversold contrarian opportunity, citing a fortress balance sheet, attractive 12.64x P/E valuation, and technical capitulation signals (RSI 24.53) that should drive recovery. The bear case counters that ",
+      "risk_level": "HIGH",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio 1.25x below 1.5x minimum threshold",
+        "RSI 24.53 indicates oversold conditions with potential volatility",
+        "Insufficient risk/reward compensation for position risk",
+        "Hold position with negative risk/reward profile not recommended"
+      ],
+      "market_price": 5900.0,
+      "market_change": 0.85,
+      "sector": "Financial Services",
+      "rsi": 24.53,
+      "analyzed_at": "05 May 2026 01:44 WIB",
+      "sources": [
+        "VALUE"
+      ],
+      "is_syariah": false
+    },
+    {
+      "ticker": "BUMI",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": 230.0,
+      "target_price": 185.0,
+      "stop_loss": 250.0,
+      "position_size": 0.0,
+      "reasoning": "Trade fails risk framework on multiple critical criteria and violates established portfolio policy. Risk/reward ratio of -45x catastrophically violates 1.5x minimum threshold (loss of Rp20 vs gain of Rp45 per share). Debt/equity ratio of 15.1 is 5x above maximum policy of 3.0, creating extreme financial distress and forced-covering risk in commodity cyclicals. Historical pattern shows BUMI proposals consistently feature inverted risk/reward structures where max loss vastly exceeds max gain - thi",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.92
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "sentiment",
+          "signal": "HOLD",
+          "confidence": 0.65
+        },
+        {
+          "type": "macro",
+          "signal": "SELL",
+          "confidence": 0.72
+        }
+      ],
+      "debate_consensus": "STRONG_SELL",
+      "debate_winner": "BEAR",
+      "debate_summary": "# BUMI Debate Summary\n\n**Bull Case:** BUMI is deeply undervalued with strong Indonesian coal fundamentals and structural recovery potential, with the extreme 92% SELL signal paradoxically indicating excessive pessimism that could drive significant upside as interest rates normalize.\n\n**Bear Case:** ",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio -45.00x severely violates 1.5x minimum threshold",
+        "Debt/equity ratio 15.1 far exceeds 3.0 maximum - extreme leverage risk",
+        "Negative risk/reward: loss of Rp20 per share vs gain of Rp45 per share",
+        "Stop loss Rp250 creates 8.7% max loss on position",
+        "RSI 42.86 indicates weakening momentum in energy sector",
+        "High financial distress risk given extreme leverage"
+      ],
+      "market_price": 230.0,
+      "market_change": -4.17,
+      "sector": "Energy",
+      "rsi": 42.86,
+      "analyzed_at": "05 May 2026 01:44 WIB",
+      "sources": [
+        "VALUE"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "GOTO",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": 51.0,
+      "target_price": 42.0,
+      "stop_loss": 56.0,
+      "position_size": 0.0,
+      "reasoning": "REJECT on multiple critical risk thresholds. Risk review explicitly flags REJECT status with six material violations: (1) R/R ratio of -9.00x catastrophically inverts required 1.5x minimum, creating negative expected value; (2) D/E ratio of 27.754x indicates structural insolvency far exceeding 3.0x maximum tolerance; (3) Stop loss at Rp56 (9.8% above entry) violates 8% drawdown tolerance; (4) Negative ROE of -3.29% and unprofitable operations signal fundamental distress not justified by directio",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.78
+        },
+        {
+          "type": "sentiment",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.65
+        }
+      ],
+      "debate_consensus": "SELL",
+      "debate_winner": "BEAR",
+      "debate_summary": "# GOTO Summary\n\n**Bull Case:** GOTO offers deep-value potential with 26.3% revenue growth across massive TAM markets (ride-hailing, e-commerce, payments) and improving unit economics, with current valuations near 52-week lows providing a compelling margin of safety despite temporary cyclical headwin",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio -9.00x severely below 1.5x minimum threshold",
+        "Debt/equity ratio 27.754 far exceeds 3.0 maximum limit",
+        "Negative risk/reward indicates asymmetric downside exposure",
+        "Position at maximum 10% allocation compounds leverage risk",
+        "Stop loss 9.8% above entry violates 8% drawdown tolerance",
+        "Sell signal with weak technical setup (RSI 46.67 neutral)"
+      ],
+      "market_price": 51.0,
+      "market_change": -5.56,
+      "sector": "Technology",
+      "rsi": 46.67,
+      "analyzed_at": "05 May 2026 01:44 WIB",
+      "sources": [
+        "VALUE"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "BMRI",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": 4420.0,
+      "target_price": null,
+      "stop_loss": 4100.0,
+      "position_size": 0.0,
+      "reasoning": "PASS decision based on portfolio history lessons and current risk-reward misalignment. Risk review flags R/R ratio at 1.34x (below 1.5x minimum threshold) and RSI 38.46 (oversold without dual confirmation). Historical pattern shows conflicting signals (82% technical SELL vs. fundamental attraction) require hard binary choice with technical confirmation—price must break above Rp4,650 AND RSI recover above 40 with volume support before overriding technical weakness. Structural revenue growth diver",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "BUY",
+          "confidence": 0.82
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "sentiment",
+          "signal": "HOLD",
+          "confidence": 0.55
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.72
+        }
+      ],
+      "debate_consensus": "HOLD",
+      "debate_winner": null,
+      "debate_summary": "# BMRI Debate Summary\n\n**Bull vs. Bear:** The bull case argues BMRI is an undervalued accumulation opportunity with strong fundamentals despite near-term weakness, while the bear case contends the cheap 7.33x P/E is justified by anemic 1.5% revenue growth, deteriorating technicals (negative MACD, 20",
+      "risk_level": "MEDIUM",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio 1.34x below 1.5x minimum threshold",
+        "RSI 38.46 indicates oversold conditions with potential volatility",
+        "Insufficient reward relative to risk taken"
+      ],
+      "market_price": 4420.0,
+      "market_change": 0.68,
+      "sector": "Financial Services",
+      "rsi": 38.46,
+      "analyzed_at": "05 May 2026 01:45 WIB",
+      "sources": [
+        "VALUE"
+      ],
+      "is_syariah": false
+    },
+    {
+      "ticker": "BRPT",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": null,
+      "target_price": 1550.0,
+      "stop_loss": 2100.0,
+      "position_size": 0.0,
+      "reasoning": "Trade rejected despite bearish thesis. Risk/reward ratio of -295x severely violates 1.5x minimum threshold. Stop loss (Rp2,100) positioned above entry (Rp1,845), creating inverted risk mechanics where maximum loss (13.8%) far exceeds target profit (-15.9%). Extreme D/E ratio of 134.8x indicates structural insolvency risk rather than tradeable short opportunity—bankruptcy/restructuring dynamics create unpredictable downside. RSI 35.68 suggests imminent reversal bounce, increasing stop-loss hit pr",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.85
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "sentiment",
+          "signal": "HOLD",
+          "confidence": 0.55
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.68
+        }
+      ],
+      "debate_consensus": "SELL",
+      "debate_winner": "BEAR",
+      "debate_summary": "# BRPT Debate Summary\n\n**Bull Case:** BRPT is a severely oversold deep-value play down 57% from highs, offering a margin-of-safety entry as the market overreacted to balance sheet concerns; the core pulp and paper business remains viable with structural demand tailwinds from Indonesia's 5% GDP growt",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio -295.00x severely below 1.5x minimum threshold",
+        "Extreme leverage: D/E ratio 134.8 far exceeds 3.0 limit",
+        "Negative expected value: stop loss 13.8% vs target -15.9% reward",
+        "Unfavorable risk/reward structure for short position",
+        "RSI 35.68 indicates potential reversal or support zone",
+        "Position at maximum portfolio weight compounds risk"
+      ],
+      "market_price": 1845.0,
+      "market_change": 0.54,
+      "sector": "Basic Materials",
+      "rsi": 35.68,
+      "analyzed_at": "05 May 2026 01:45 WIB",
+      "sources": [
+        "VALUE"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "CUAN",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": 1160.0,
+      "target_price": 870.0,
+      "stop_loss": 1380.0,
+      "position_size": 0.0,
+      "reasoning": "CUAN fails multiple non-negotiable risk thresholds and exhibits structural defects that invalidate the trade thesis. Primary rejection factors: (1) Inverted stop-loss structure at Rp1,380 (above entry at Rp1,160) guarantees losses before thesis can develop—violates fundamental risk management protocol; (2) Debt/Equity ratio of 241x far exceeds 3.0x maximum threshold, indicating insolvency risk rather than valuation opportunity; (3) Risk-reward ratio of -290x catastrophically violates 1.5x minimu",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.92
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.85
+        },
+        {
+          "type": "sentiment",
+          "signal": "HOLD",
+          "confidence": 0.55
+        },
+        {
+          "type": "macro",
+          "signal": "SELL",
+          "confidence": 0.72
+        }
+      ],
+      "debate_consensus": "STRONG_SELL",
+      "debate_winner": "BEAR",
+      "debate_summary": "# CUAN Debate Summary\n\n**Bull Case:** CUAN is a severely undervalued turnaround with 73.6% revenue growth indicating a structural transition to profitability; extreme valuation multiples and the 58% decline from highs reflect temporary oversold conditions typical of hypergrowth companies, creating a",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio -290.00x severely violates 1.5x minimum requirement",
+        "Debt/Equity ratio 241.0 far exceeds 3.0 threshold - extreme financial leverage",
+        "Negative risk/reward structure: stop loss Rp1,380 vs target Rp870 inverts risk management",
+        "Max loss (18.97%) exceeds 8% drawdown tolerance",
+        "Oversold RSI 29.55 suggests potential whipsaw in volatile energy sector",
+        "Short position on highly leveraged company increases counterparty and solvency risk"
+      ],
+      "market_price": 1160.0,
+      "market_change": -3.33,
+      "sector": "Energy",
+      "rsi": 29.55,
+      "analyzed_at": "05 May 2026 01:45 WIB",
+      "sources": [
+        "VALUE"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "MINA",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": null,
+      "target_price": null,
+      "stop_loss": null,
+      "position_size": 0.0,
+      "reasoning": "MINA fails multiple critical risk filters and presents unacceptable risk-reward dynamics. The proposal contains fundamental contradictions: recommending a HOLD with zero position size while target price (Rp365) sits below entry (Rp382), creating -4.7% downside asymmetry. Risk review explicitly rejects the trade with R/R ratio of -17.00x, violating the 1.5x minimum threshold. Overbought RSI of 71.6 combined with negative ROE (-0.96%), zero earnings, and extreme valuation (P/B 15.02x) indicates sp",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.78
+        },
+        {
+          "type": "sentiment",
+          "signal": "BUY",
+          "confidence": 0.72
+        },
+        {
+          "type": "macro",
+          "signal": "BUY",
+          "confidence": 0.72
+        }
+      ],
+      "debate_consensus": "HOLD",
+      "debate_winner": null,
+      "debate_summary": "# MINA Debate Summary\n\n**Bull Case:** MINA offers a turnaround opportunity driven by sector rotation into consumer cyclicals, macro tailwinds supporting domestic consumption, and significant volume accumulation suggesting institutional conviction, with the recent 13.02% rally signaling genuine reall",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio -17.00x violates 1.5x minimum threshold",
+        "Negative risk/reward structure: target below entry price",
+        "RSI 71.6 indicates overbought conditions",
+        "Zero position size contradicts hold recommendation",
+        "Trade logic inconsistent: holding with downside target"
+      ],
+      "market_price": 382.0,
+      "market_change": 13.02,
+      "sector": "Consumer Cyclical",
+      "rsi": 71.6,
+      "analyzed_at": "05 May 2026 01:45 WIB",
+      "sources": [
+        "VALUE",
+        "FREQUENCY"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "TINS",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": 3800.0,
+      "target_price": null,
+      "stop_loss": 3420.0,
+      "position_size": 0.0,
+      "reasoning": "TINS fails risk compliance despite attractive technical setup. The D/E ratio of 19.81 is critically excessive and disqualifying under portfolio risk policy (threshold: 3.0 maximum). This 6.6x policy violation indicates severe financial leverage vulnerability that contradicts prudent risk management, regardless of 20% upside potential or 72% bullish sentiment consensus. The company's solvency risk in Basic Materials sector amplifies downside exposure during commodity stress. While fundamental wea",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.78
+        },
+        {
+          "type": "technical",
+          "signal": "BUY",
+          "confidence": 0.72
+        },
+        {
+          "type": "sentiment",
+          "signal": "BUY",
+          "confidence": 0.72
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.65
+        }
+      ],
+      "debate_consensus": "BUY",
+      "debate_winner": "BULL",
+      "debate_summary": "# TINS Debate Summary\n\nTINS shows impressive 90.1% revenue growth and strong technical momentum (+42.7% above 200-day MA), suggesting institutional conviction in a tin sector recovery with an asymmetric risk-reward setup. However, this growth masks deteriorating profitability and an alarming 19.81x ",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "CRITICAL: Debt/Equity ratio 19.81 far exceeds 3.0 threshold - severe financial leverage risk",
+        "Extreme solvency concern: D/E of 19.81 indicates company is highly leveraged and vulnerable to market stress",
+        "Basic Materials sector amplifies leverage risk during commodity downturns",
+        "Stop loss at Rp3,420 represents 10% drawdown - at maximum tolerance threshold",
+        "High leverage contradicts stated 2.0x risk/reward ratio which appears overstated given solvency risk"
+      ],
+      "market_price": 3800.0,
+      "market_change": 6.15,
+      "sector": "Basic Materials",
+      "rsi": 54.62,
+      "analyzed_at": "05 May 2026 01:45 WIB",
+      "sources": [
+        "VALUE"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "ANTM",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": 3800.0,
+      "target_price": 3230.0,
+      "stop_loss": 4180.0,
+      "position_size": 0.0,
+      "reasoning": "ANTM trade proposal REJECTED due to multiple critical risk violations that override any fundamental thesis. Risk review explicitly flags REJECT status with unacceptable risk profile. Debt-to-equity ratio of 21.61 catastrophically exceeds 3.0 maximum threshold, creating severe solvency risk inappropriate for portfolio exposure. Risk/reward ratio of -570x is mathematically negative and violates minimum 1.5x threshold—stop loss of 950 pips vs target profit of 570 pips creates inverted payoff struct",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "technical",
+          "signal": "HOLD",
+          "confidence": 0.65
+        },
+        {
+          "type": "sentiment",
+          "signal": "HOLD",
+          "confidence": 0.55
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.65
+        }
+      ],
+      "debate_consensus": "SELL",
+      "debate_winner": "BEAR",
+      "debate_summary": "# ANTM Debate Summary\n\n**Bulls argue ANTM is undervalued with strong profitability metrics (24.7% ROE, 12.67 P/E) being unfairly discounted by temporary macro headwinds, while bears contend the attractive valuation is a trap masking dangerous leverage (21.61 debt/equity ratio) that eliminates financ",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio -570.00x catastrophically below 1.5x minimum threshold",
+        "Debt-to-equity ratio 21.609 exceeds 3.0 maximum - extreme financial leverage",
+        "Negative risk-reward structure: stop loss 950 pips vs target profit 570 pips",
+        "Position at maximum portfolio allocation (10%) with unacceptable risk profile",
+        "Short seller positioned against highly leveraged equity with asymmetric downside"
+      ],
+      "market_price": 3800.0,
+      "market_change": 1.6,
+      "sector": "Basic Materials",
+      "rsi": 52.29,
+      "analyzed_at": "05 May 2026 01:46 WIB",
+      "sources": [
+        "VALUE"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "FWCT",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": 120.0,
+      "target_price": 95.0,
+      "stop_loss": 132.0,
+      "position_size": 0.0,
+      "reasoning": "Trade proposal fundamentally violates quantitative risk management thresholds across multiple critical dimensions. The -25.0x risk/reward ratio is catastrophically unfavorable, with maximum portfolio loss (10%) dwarfing profit target (0.4%), creating severe asymmetric downside exposure. Debt/equity ratio of 87.1% indicates extreme financial distress and insolvency risk, far exceeding the 3.0 maximum threshold. Stop loss placement 10% above entry (at Rp132) provides insufficient margin of safety ",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.75
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "sentiment",
+          "signal": "BUY",
+          "confidence": 0.72
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.62
+        }
+      ],
+      "debate_consensus": "SELL",
+      "debate_winner": "BEAR",
+      "debate_summary": "# FWCT Debate Summary\n\nThe bull case argues FWCT's 34.83% rally reflects justified institutional confidence in a turnaround, citing attractive 0.68 P/B valuation and strong technical momentum despite fundamental headwinds. The bear case counters that this surge is a momentum trap lacking concrete ca",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio -25.00x severely violates 1.5x minimum threshold",
+        "Debt/equity ratio 87.1 far exceeds 3.0 maximum - extreme financial leverage",
+        "Negative risk/reward indicates asymmetric downside exposure",
+        "RSI 68.85 indicates overbought conditions contradicting short thesis",
+        "Position equals 10% portfolio max with unfavorable risk parameters",
+        "Stop loss 10% above entry provides insufficient margin of safety"
+      ],
+      "market_price": 120.0,
+      "market_change": 34.83,
+      "sector": "Basic Materials",
+      "rsi": 68.85,
+      "analyzed_at": "05 May 2026 01:46 WIB",
+      "sources": [
+        "GAINER",
+        "FREQUENCY"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "FILM",
+      "decision": "PASS",
+      "action": "HOLD",
+      "entry_price": null,
+      "target_price": null,
+      "stop_loss": null,
+      "position_size": 0.0,
+      "reasoning": "Trade REJECTED due to multiple critical risk violations that cannot be mitigated through position sizing adjustments. The proposed short position exhibits an inverted risk/reward structure (-550.0x R/R ratio vs. 1.5x minimum requirement), creating asymmetric unlimited downside exposure characteristic of short equity positions. Fundamental concerns are valid (negative ROE -9.72%, extreme leverage D/E 12.22x vs. 3.0x maximum, valuation distortion), but execution structure is fundamentally flawed. ",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.92
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "sentiment",
+          "signal": "BUY",
+          "confidence": 0.65
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.65
+        }
+      ],
+      "debate_consensus": "SELL",
+      "debate_winner": "BEAR",
+      "debate_summary": "# FILM Summary\n\n**Bull Case:** FILM's 79.6% collapse represents a classic deep-value turnaround with extreme sentiment capitulation creating asymmetric risk-reward, evidenced by a +23.95% relief rally on institutional accumulation and 23% revenue growth that demonstrates operational resilience despi",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio -550.00x severely violates 1.5x minimum threshold",
+        "D/E ratio 12.22 far exceeds 3.0 maximum - extreme financial leverage",
+        "Inverted risk/reward structure: stop loss wider than profit target",
+        "Short position with asymmetric downside: unlimited loss potential on short",
+        "Position sized at maximum (10%) while carrying critical quantitative failures",
+        "Neutral RSI (48.99) provides no momentum confirmation for directional trade"
+      ],
+      "market_price": 2950.0,
+      "market_change": 23.95,
+      "sector": "Communication Services",
+      "rsi": 48.99,
+      "analyzed_at": "05 May 2026 01:47 WIB",
+      "sources": [
+        "GAINER"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "HERO",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": null,
+      "target_price": null,
+      "stop_loss": null,
+      "position_size": 0.0,
+      "reasoning": "HERO fails multiple disqualifying criteria that override all bullish narratives. The trade structure is fundamentally broken: entry price equals target equals stop loss (Rp590), eliminating any risk-reward asymmetry and producing a 0.00x R/R ratio versus the mandatory 1.5x minimum. Debt-to-equity ratio of 75.95x catastrophically exceeds the 3.0x threshold by 25x, indicating structural insolvency regardless of macro tailwinds. Extreme leverage means the company cannot service debt in a cyclical d",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.78
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.85
+        },
+        {
+          "type": "sentiment",
+          "signal": "BUY",
+          "confidence": 0.72
+        },
+        {
+          "type": "macro",
+          "signal": "BUY",
+          "confidence": 0.72
+        }
+      ],
+      "debate_consensus": "HOLD",
+      "debate_winner": null,
+      "debate_summary": "# HERO Debate Summary\n\n**Bull Case:** HERO offers a tactical opportunity with genuine positive momentum (+24.47%), institutional-grade volume confirmation, and 72% analyst BUY confidence backed by Indonesia's 5.0% GDP growth; the elevated 65.48x P/E reflects depressed cyclical earnings that should c",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio 0.00x fails minimum 1.5x requirement",
+        "Debt/equity ratio 75.9 catastrophically exceeds 3.0 threshold",
+        "RSI 84.67 indicates severely overbought condition",
+        "Entry equals target equals stop - no risk/reward asymmetry",
+        "Zero position allocation - trade structure invalid"
+      ],
+      "market_price": 590.0,
+      "market_change": 24.47,
+      "sector": "Consumer Cyclical",
+      "rsi": 84.67,
+      "analyzed_at": "05 May 2026 01:47 WIB",
+      "sources": [
+        "GAINER"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "BAIK",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": 665.0,
+      "target_price": 520.0,
+      "stop_loss": 745.0,
+      "position_size": 0.0,
+      "reasoning": "TRADE REJECTED on multiple critical grounds: (1) Risk/reward ratio of -145x is catastrophically below 1.5x minimum threshold, creating structurally negative expected value; (2) RSI 96.06 indicates extreme overbought conditions that precede forced-cover whipsaws rather than sustainable downside; (3) Zero or near-zero trading volume indicates severe liquidity constraints incompatible with short position management; (4) Proposed 10% position size is excessive for high-risk short sale in illiquid mi",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.65
+        },
+        {
+          "type": "technical",
+          "signal": "SELL",
+          "confidence": 0.92
+        },
+        {
+          "type": "sentiment",
+          "signal": "HOLD",
+          "confidence": 0.45
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.65
+        }
+      ],
+      "debate_consensus": "SELL",
+      "debate_winner": "BEAR",
+      "debate_summary": "# BAIK Debate Summary\n\nBAIK has rallied 893% from 52-week lows, with bulls arguing this represents genuine business momentum and a structural support level creating a contrarian opportunity, while bears counter that extreme technical overbought conditions (RSI 96, MACD 93.76), abysmal fundamentals (",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "R/R ratio -145.00x severely below 1.5x minimum threshold",
+        "Current volume 0 shares indicates data unavailable or no trading",
+        "RSI 96.06 indicates extreme overbought conditions",
+        "Negative expected value on trade structure",
+        "10% position size excessive for high-risk short sale",
+        "Stop loss 12.0% above entry creates asymmetric unfavorable risk"
+      ],
+      "market_price": 665.0,
+      "market_change": 0.0,
+      "sector": "Consumer Cyclical",
+      "rsi": 96.06,
+      "analyzed_at": "05 May 2026 01:47 WIB",
+      "sources": [
+        "GAINER"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "ASPR",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": 332.0,
+      "target_price": 385.0,
+      "stop_loss": 298.0,
+      "position_size": 0.0,
+      "reasoning": "Trade rejected due to critical solvency risk that violates fund policy. D/E ratio of 63.2x far exceeds the 3.0 threshold, indicating extreme leverage and elevated financial distress risk. This fundamental constraint overrides positive technical signals (82% STRONG_BUY) and sentiment metrics (72%). Maximum loss of 10.2% exceeds the 8% drawdown tolerance. RSI at 64.05 signals overbought conditions with elevated reversal risk in a highly leveraged capital structure. The risk/reward ratio of 1.56x p",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        {
+          "type": "technical",
+          "signal": "STRONG_BUY",
+          "confidence": 0.82
+        },
+        {
+          "type": "sentiment",
+          "signal": "BUY",
+          "confidence": 0.72
+        },
+        {
+          "type": "macro",
+          "signal": "BUY",
+          "confidence": 0.72
+        }
+      ],
+      "debate_consensus": "BUY",
+      "debate_winner": "BULL",
+      "debate_summary": "# ASPR Debate Summary\n\nThe bull case emphasizes ASPR's exceptional 274% revenue growth, strong technical momentum (72.3% above SMA50, RSI 64.05), and supportive Indonesian macro conditions (5% GDP growth, 6.0% policy rate), arguing institutional conviction is driving a fundamental repricing higher. ",
+      "risk_level": "REJECT",
+      "risk_approved": false,
+      "risk_flags": [
+        "CRITICAL: D/E ratio 63.2 far exceeds 3.0 threshold - extreme leverage risk",
+        "Proposed position 8.3% acceptable by size but unsuitable given solvency risk",
+        "RSI 64.05 indicates overbought conditions - elevated reversal risk",
+        "Max loss of 10.2% exceeds 8% drawdown tolerance threshold",
+        "High leverage amplifies downside in consumer cyclical sector downturn",
+        "Risk/reward 1.56x marginally meets 1.5x minimum - insufficient margin of safety"
+      ],
+      "market_price": 332.0,
+      "market_change": 14.48,
+      "sector": "Consumer Cyclical",
+      "rsi": 64.05,
+      "analyzed_at": "05 May 2026 01:47 WIB",
+      "sources": [
+        "FREQUENCY"
+      ],
+      "is_syariah": true
+    },
+    {
+      "ticker": "PADI",
+      "decision": "PASS",
+      "action": null,
+      "entry_price": 123.0,
+      "target_price": 145.0,
+      "stop_loss": 115.0,
+      "position_size": 0.0,
+      "reasoning": "PADI trade rejected due to multiple critical risk factors that breach portfolio risk parameters. Primary disqualifying factor: D/E ratio of 5.612 substantially exceeds maximum threshold of 3.0, creating unacceptable leverage and systemic risk in financial services sector. Secondary concerns: proposed 6.5% position sizing combined with 10.57% max loss breach 8% drawdown tolerance limit. RSI at 42.42 contradicts bullish technical thesis, indicating bearish momentum despite 72% buy signals. Even wi",
+      "analyst_signals": [
+        {
+          "type": "fundamental",
+          "signal": "SELL",
+          "confidence": 0.85
+        },
+        {
+          "type": "technical",
+          "signal": "BUY",
+          "confidence": 0.72
+        },
+        {
+          "type": "sentiment",
+          "signal": "BUY",
+          "confidence": 0.72
+        },
+        {
+          "type": "macro",
+          "signal": "HOLD",
+          "confidence": 0.68
+        }
+      ],
+      "debate_consensus": "BUY",
+      "debate_winner": "BULL",
+      "debate_summary": "# PADI Debate Summary\n\nThe bull case views PADI's 38% decline as a healthy valuation correction with institutional accumulation driving a technical recovery, supported by strong 26.7% revenue growth and recent volume-driven price advances. The bear case counters that this is a value trap where the s",
+      "risk_level": "HIGH",
+      "risk_approved": false,
+      "risk_flags": [
+        "D/E ratio 5.612 exceeds maximum threshold of 3.0",
+        "Excessive leverage creates systemic risk in financial services sector",
+        "Max loss of 10.57% breaches 8% drawdown tolerance",
+        "RSI at 42.42 indicates bearish momentum",
+        "Stop loss at Rp110 provides insufficient margin of safety"
+      ],
+      "market_price": 123.0,
+      "market_change": 13.89,
+      "sector": "Financial Services",
+      "rsi": 42.42,
+      "analyzed_at": "05 May 2026 01:48 WIB",
+      "sources": [
+        "FREQUENCY"
+      ],
+      "is_syariah": true
+    }
+  ]
 }
