@@ -6,6 +6,8 @@ from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 import pytz
 import progress_tracker as PT
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 WIB  = pytz.timezone('Asia/Jakarta')
 ROOT = Path(__file__).parent
@@ -153,6 +155,17 @@ def favicon():
     return "", 204
 
 
+def _run_batch_scheduler():
+    """Run batch analysis — called by APScheduler on Railway."""
+    try:
+        from batch_analysis import main as batch_main
+        print(f"[{datetime.now(WIB).strftime('%H:%M')}] Scheduler: memulai batch analysis...")
+        batch_main()
+        print(f"[{datetime.now(WIB).strftime('%H:%M')}] Scheduler: batch selesai ✅")
+    except Exception as e:
+        print(f"[scheduler] error: {e}")
+
+
 if __name__ == "__main__":
     # Local: use HTTPS cert if available; Railway: plain HTTP (TLS handled by proxy)
     IS_RAILWAY = bool(os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("PORT"))
@@ -166,6 +179,20 @@ if __name__ == "__main__":
         key  = ROOT / "certs" / "key.pem"
         ssl_ctx = (str(cert), str(key)) if cert.exists() and key.exists() else None
         proto   = "https" if ssl_ctx else "http"
+
+    # Scheduler: run batch analysis every hour during IDX market hours (Railway only)
+    if IS_RAILWAY:
+        _scheduler = BackgroundScheduler(timezone=WIB)
+        _scheduler.add_job(
+            _run_batch_scheduler,
+            CronTrigger(day_of_week="mon-fri", hour="9-16", minute="5", timezone=WIB),
+            id="batch_hourly",
+            max_instances=1,
+            coalesce=True,
+            misfire_grace_time=300,
+        )
+        _scheduler.start()
+        print(f"📅 Scheduler aktif: batch analysis tiap jam 09:05–16:05 WIB (Mon–Fri)")
 
     pin_status = f"PIN: {'enabled ✅' if API_PIN else 'disabled (set API_PIN to enable)'}"
     print(f"🌐 IDX AI Hedge Fund API  |  {pin_status}")
