@@ -185,14 +185,14 @@ if __name__ == "__main__":
         _scheduler = BackgroundScheduler(timezone=WIB)
         _scheduler.add_job(
             _run_batch_scheduler,
-            CronTrigger(day_of_week="mon-fri", hour="9-16", minute="5", timezone=WIB),
+            CronTrigger(day_of_week="mon-fri", hour="10-16", minute="5", timezone=WIB),
             id="batch_hourly",
             max_instances=1,
             coalesce=True,
             misfire_grace_time=300,
         )
         _scheduler.start()
-        print(f"📅 Scheduler aktif: batch analysis tiap jam 09:05–16:05 WIB (Mon–Fri)")
+        print(f"📅 Scheduler aktif: batch analysis tiap jam 10:05–16:05 WIB (Mon–Fri)")
 
     pin_status = f"PIN: {'enabled ✅' if API_PIN else 'disabled (set API_PIN to enable)'}"
     print(f"🌐 IDX AI Hedge Fund API  |  {pin_status}")

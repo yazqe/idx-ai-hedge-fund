@@ -260,6 +260,18 @@ def main(tickers=None):
     }
 
     out_file = OUT_DIR / "latest.json"
+    # Guard: never overwrite previous good data with an empty result set
+    # (avoids early-morning runs wiping the display when filters return nothing)
+    if not results and out_file.exists():
+        try:
+            existing = json.loads(out_file.read_text())
+            if existing.get("results"):
+                print(f"\n⚠️  Skip overwrite: 0 results — preserving previous "
+                      f"({existing.get('total', 0)} stocks, {existing.get('generated_at','?')})")
+                return existing
+        except Exception:
+            pass
+
     with open(out_file, "w") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
