@@ -1,0 +1,3 @@
+hedge.yazki.uk {
+	reverse_proxy app:8000
+}

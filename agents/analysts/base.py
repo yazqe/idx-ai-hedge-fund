@@ -1,6 +1,5 @@
 """Base analyst with shared LLM client."""
 import os
-import anthropic
 
 # Load .env if present
 try:
@@ -9,8 +8,9 @@ try:
 except ImportError:
     pass
 
-client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-MODEL  = "claude-haiku-4-5-20251001"
+# Backend-switchable client (anthropic | local Qwen via OpenAI-compatible).
+# Re-exported for debate.py which does `from agents.analysts.base import client, MODEL`.
+from agents.llm import client, MODEL
 
 
 def _flatten(val):
@@ -18,6 +18,26 @@ def _flatten(val):
     if isinstance(val, dict):
         return " | ".join(str(v) for v in val.values() if v)
     return val
+
+
+import re as _re
+
+
+def _to_float(v):
+    """Coerce LLM numerics to float: 5075, "5,075", "Rp5.075", "80%", "5000-5200" → float.
+    Returns None if no number found. Strips thousands separators; takes first number."""
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    if isinstance(v, str):
+        m = _re.search(r"-?\d+(?:\.\d+)?", v.replace(",", ""))
+        if m:
+            try:
+                return float(m.group())
+            except ValueError:
+                return None
+    return None
 
 
 def _normalize_report(d: dict) -> dict:
@@ -64,11 +84,13 @@ def _normalize_report(d: dict) -> dict:
     if "decision" in d and isinstance(d["decision"], str):
         d["decision"] = d["decision"].strip().upper()
 
-    # Normalize confidence: 72 → 0.72
-    if "confidence" in d and isinstance(d["confidence"], (int, float)):
-        if d["confidence"] > 1.0:
-            d["confidence"] = d["confidence"] / 100.0
-        d["confidence"] = max(0.0, min(1.0, d["confidence"]))
+    # Normalize confidence: handles 72, "72", "72%", "0.72", "high" → 0.0–1.0.
+    c = _to_float(d.get("confidence"))
+    if c is None:
+        c = 0.5
+    if c > 1.0:
+        c = c / 100.0
+    d["confidence"] = max(0.0, min(1.0, c))
     for field in ("key_points", "risks"):
         if field in d and isinstance(d[field], list):
             d[field] = [_flatten(item) if isinstance(item, dict) else str(item)
@@ -84,10 +106,7 @@ def _normalize_report(d: dict) -> dict:
             else:
                 d["price_target"] = None
         elif pt is not None:
-            try:
-                d["price_target"] = float(pt)
-            except (TypeError, ValueError):
-                d["price_target"] = None
+            d["price_target"] = _to_float(pt)
     return d
 
 
@@ -97,7 +116,7 @@ def call_llm(system: str, user: str, schema_class) -> dict:
     resp = client.messages.create(
         model=MODEL,
         max_tokens=900,
-        system=system + "\n\nRespond ONLY with valid JSON. key_points and risks must be list of plain strings. price_target must be a single number. No markdown.",
+        system=system + "\n\nRespond ONLY with valid JSON. key_points and risks must be list of plain strings. price_target must be a single number. confidence must be a decimal between 0 and 1 (e.g. 0.75) reflecting your actual conviction — NOT a percentage, NOT a word, and do not default to 0.5. No markdown.",
         messages=[{"role": "user", "content": user}],
     )
     text = resp.content[0].text.strip()
